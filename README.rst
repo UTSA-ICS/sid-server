@@ -1,3 +1,36 @@
+===========
+sid-server
+===========
+
+SID-SERVER service for Openstack
+
+This service will act as a SID Server for Security Based Resource Sharing<br>
+
+First you will need to download the sid-server project:<br>
+a.) cd /opt/stack<br>
+b.) git clone https://github.com/UTSA-ICS/sid-server.git<br>
+c.) sudo mkdir /etc/sid-server/<br>
+
+To be able to use this service do the following:<br>
+1.) Copy sid-server/etc to /etc/sid-server<br>
+sudo cp /opt/stack/sid-server/etc/* /etc/sid-server/.<br>
+2.) Create a directory called /var/cache/sid-server and give it 777 permission<br>
+sudo mkdir /var/cache/sid-server<br>
+sudo chmod 777 /var/cache/sid-server<br>
+3.) Create a user [sid-server] with password [admin] in the service tenant with 'admin' role<br>
+openstack user create --password admin --enabled sid-server<br>
+openstack role add --project service --user "sid-server" admin<br>
+4.) Create a service called 'rebac' in Keystone<br>
+openstack service create --name "sid-server" --description "SID Server" --enable sid-server<br>
+5.) To start the SID-SERVER service run the following commands:<br>
+cd /opt/stack; sudo pip install -e rebac<br>
+cd /opt/stack/sid-server; /opt/stack/sid-server/bin/sid-server-api --config-file=/etc/rebac/sid-server-api.conf || touch "/opt/stack/status/stack/sid-server-api.failure"<br>
+6.) Verify sid-server service running in screen<br>
+
+To Test Usage:
+==============
+
+
 ==================
 OpenStack Keystone
 ==================
