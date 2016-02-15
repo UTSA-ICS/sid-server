@@ -28,11 +28,11 @@ To be able to use this service do the following:
 
 3.) Create a user [sid-server] with password [admin] in the service tenant with 'admin' role:
 
-    openstack user create --password admin --enabled sid-server
+    openstack user create --password admin --enable sid-server
     
     openstack role add --project service --user "sid-server" admin
     
-4.) Create a service called 'rebac' in Keystone:
+4.) Create a service called 'sid-server' in Keystone:
 
     openstack service create --name "sid-server" --description "SID Server" --enable sid-server
     
