@@ -7,8 +7,11 @@ SID-SERVER service for Openstack
 This service will act as a SID Server for Security Based Resource Sharing<br>
 
 First you will need to download the sid-server project:
+
 a.) cd /opt/stack
+
 b.) git clone https://github.com/UTSA-ICS/sid-server.git
+
 c.) sudo mkdir /etc/sid-server/
 
 To be able to use this service do the following:<br>
