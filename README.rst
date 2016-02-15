@@ -18,21 +18,21 @@ To be able to use this service do the following:
 
 1.) Copy sid-server/etc to /etc/sid-server
 
-sudo cp /opt/stack/sid-server/etc/* /etc/sid-server/.
+    sudo cp /opt/stack/sid-server/etc/* /etc/sid-server/.
 
 2.) Create a directory called /var/cache/sid-server and give it 777 permission
 
-sudo mkdir /var/cache/sid-server
-sudo chmod 777 /var/cache/sid-server
+    sudo mkdir /var/cache/sid-server
+    sudo chmod 777 /var/cache/sid-server
 
 3.) Create a user [sid-server] with password [admin] in the service tenant with 'admin' role
-openstack user create --password admin --enabled sid-server
-openstack role add --project service --user "sid-server" admin
+    openstack user create --password admin --enabled sid-server
+    openstack role add --project service --user "sid-server" admin
 4.) Create a service called 'rebac' in Keystone<br>
-openstack service create --name "sid-server" --description "SID Server" --enable sid-server
+    openstack service create --name "sid-server" --description "SID Server" --enable sid-server
 5.) To start the SID-SERVER service run the following commands:
-cd /opt/stack; sudo pip install -e rebac<br>
-cd /opt/stack/sid-server; /opt/stack/sid-server/bin/sid-server-api --config-file=/etc/rebac/sid-server-api.conf || touch "/opt/stack/status/stack/sid-server-api.failure"
+    cd /opt/stack; sudo pip install -e rebac<br>
+    cd /opt/stack/sid-server; /opt/stack/sid-server/bin/sid-server-api --config-file=/etc/rebac/sid-server-api.conf || touch "/opt/stack/status/stack/sid-server-api.failure"
 6.) Verify sid-server service running in screen
 
 To Test Usage:
