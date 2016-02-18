@@ -2,7 +2,7 @@
 sidserver
 ===========
 
-SID-SERVER service for Openstack
+SIDSERVER service for AWS & Azure
 
 This service will act as a SID Server for Security Based Resource Sharing<br>
 
