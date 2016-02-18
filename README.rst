@@ -36,7 +36,7 @@ To be able to use this service do the following:
 
     openstack service create --name "sidserver" --description "SID Server" --enable sidserver
     
-5.) To start the SID-SERVER service run the following commands:
+5.) To start the SIDSERVER service run the following commands:
 
     cd /opt/stack; sudo pip install -e sidserver
     
