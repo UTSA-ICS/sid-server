@@ -19,14 +19,14 @@ General
 =======
 
 This Extension Development Guide provides some mocked code to use as an
-Extension code base in the ``keystone/contrib/example`` folder.
+Extension code base in the ``sidserver/contrib/example`` folder.
 
-- All Extensions must be created in the ``keystone/contrib`` folder.
+- All Extensions must be created in the ``sidserver/contrib`` folder.
 - The new Extension code must be contained in a new folder under ``contrib``.
 - Whenever possible an Extension should follow the following directory
   structure convention::
 
-      keystone/contrib/
+      sidserver/contrib/
       └── my_extension
           ├── backends (optional)
           │   ├── __init__.py (mandatory)
@@ -52,25 +52,25 @@ Extension code base in the ``keystone/contrib/example`` folder.
 - If the Extension adds data structures, then a ``migrate_repo`` folder should
   exist.
 - If configuration changes are required/introduced in the
-  ``keystone.conf.sample`` file, these should be kept disabled as default and
+  ``sidserver.conf.sample`` file, these should be kept disabled as default and
   have their own section.
 - If configuration changes are required/introduced in the
-  ``keystone-paste.ini``, the new filter must be declared.
+  ``sidserver-paste.ini``, the new filter must be declared.
 - The module may register to listen to events by declaring the corresponding
   callbacks in the ``core.py`` file.
 - The new extension should be disabled by default (it should not affect the
   default application pipelines).
 
-Modifying the `keystone.conf.sample` File
+Modifying the `sidserver.conf.sample` File
 =========================================
 
-In the case an Extension needs to change the ``keystone.conf.sample`` file, it
+In the case an Extension needs to change the ``sidserver.conf.sample`` file, it
 must follow the config file conventions and introduce a dedicated section.
 
 Example::
 
     [example]
-    driver = keystone.contrib.example.backends.sql.mySQLClass
+    driver = sidserver.contrib.example.backends.sql.mySQLClass
 
     [my_other_extension]
     extension_flag = False
@@ -81,28 +81,28 @@ extensions are disabled.
 Example::
 
     [example]
-    #driver = keystone.contrib.example.backends.sql.mySQLClass
+    #driver = sidserver.contrib.example.backends.sql.mySQLClass
 
     [my_other_extension]
     #extension_flag = False
 
 In case the Extension is overriding or re-implementing an existing portion of
 Keystone, the required change should be commented in the ``configuration.rst``
-but not placed in the `keystone.conf.sample` file to avoid unnecessary
+but not placed in the `sidserver.conf.sample` file to avoid unnecessary
 confusion.
 
-Modifying the ``keystone-paste.ini`` File
+Modifying the ``sidserver-paste.ini`` File
 =========================================
 
 In the case an Extension is augmenting a pipeline introducing a new ``filter``
 and/or APIs in the ``OS`` namespace, a corresponding ``filter:`` section is
-necessary to be introduced in the ``keystone-paste.ini`` file. The Extension
+necessary to be introduced in the ``sidserver-paste.ini`` file. The Extension
 should declare the filter factory constructor in the ``ini`` file.
 
 Example::
 
     [filter:example]
-    paste.filter_factory = keystone.contrib.example.routers:ExampleRouter.
+    paste.filter_factory = sidserver.contrib.example.routers:ExampleRouter.
     factory
 
 The ``filter`` must not be placed in the ``pipeline`` and treated as optional.
@@ -119,7 +119,7 @@ Example:
 
 .. code-block:: python
 
-   from keystone.contrib.example.core import *
+   from sidserver.contrib.example.core import *
 
 Core
 ====
@@ -152,8 +152,8 @@ Example:
 
 .. code-block:: python
 
-    from keystone.common import wsgi
-    from keystone.contrib.example import controllers
+    from sidserver.common import wsgi
+    from sidserver.contrib.example import controllers
 
 
     class ExampleRouter(wsgi.ExtensionRouter):
@@ -195,7 +195,7 @@ mandatory to define the new table(s) that the Extension introduces and the
 attributes they are composed of.
 
 For more information on backends, refer to the `Keystone Architecture
-<http://docs.openstack.org/developer/keystone/architecture.html>`_
+<http://docs.openstack.org/developer/sidserver/architecture.html>`_
 documentation.
 
 Example:
@@ -227,7 +227,7 @@ Example:
 
 .. code-block:: bash
 
-     $ ./bin/keystone-manage db_sync --extension example
+     $ ./bin/sidserver-manage db_sync --extension example
 
 Event Callbacks
 ---------------
@@ -264,7 +264,7 @@ Example:
     class ExampleManager(manager.Manager):
         """Example Manager.
 
-        See :mod:`keystone.common.manager.Manager` for more details on
+        See :mod:`sidserver.common.manager.Manager` for more details on
         how this dynamically calls the backend.
 
         """
@@ -277,7 +277,7 @@ Example:
                     'project': [
                         self.project_deleted_callback]}}
             super(ExampleManager, self).__init__(
-                'keystone.contrib.example.core.ExampleDriver')
+                'sidserver.contrib.example.core.ExampleDriver')
 
         def project_deleted_callback(self, context, message):
             # cleanup data related to the deleted project here

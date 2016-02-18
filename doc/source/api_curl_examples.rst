@@ -70,7 +70,7 @@ Example response::
   "internal", "id": "8707e3735d4415c97ae231b4841eb1c"}, {"url":
   "http://localhost:5000/v2.0", "region": "RegionOne", "interface": "public",
   "id": "ef303187fc8d41668f25199c298396a5"}], "type": "identity", "id":
-  "bd73972c0e14fb69bae8ff76e112a90", "name": "keystone"}], "extras": {},
+  "bd73972c0e14fb69bae8ff76e112a90", "name": "sidserver"}], "extras": {},
   "user": {"domain": {"id": "default", "name": "Default"}, "id":
   "3ec3164f750146be97f21559ee4d9c51", "name": "admin"}, "issued_at":
   "201406-10T20:55:16.806027Z"}}
@@ -127,7 +127,7 @@ Example response::
    "internal", "id": "87057e3735d4415c97ae231b4841eb1c"}, {"url":
    "http://localhost:5000/v2.0", "region": "RegionOne", "interface": "public",
    "id": "ef303187fc8d41668f25199c298396a5"}], "type": "identity", "id":
-   "bd7397d2c0e14fb69bae8ff76e112a90", "name": "keystone"}], "extras": {},
+   "bd7397d2c0e14fb69bae8ff76e112a90", "name": "sidserver"}], "extras": {},
    "user": {"domain": {"id": "default", "name": "Default"}, "id":
    "3ec3164f750146be97f21559ee4d9c51", "name": "admin"}, "issued_at":
    "2014-06-10T20:40:14.360822Z"}}
@@ -182,7 +182,7 @@ Example response::
   "id": "87057e3735d4415c97ae231b4841eb1c"}, {"url":
   "http://localhost:5000/v2.0", "region": "RegionOne", "interface": "public",
   "id": "ef303187fc8d41668f25199c298396a5"}], "type": "identity", "id":
-  "bd7397d2c0e14fb69bae8ff76e112a90", "name": "keystone"}], "extras": {},
+  "bd7397d2c0e14fb69bae8ff76e112a90", "name": "sidserver"}], "extras": {},
   "user": {"domain": {"id": "default", "name": "Default"}, "id":
   "3ec3164f750146be97f21559ee4d9c51", "name": "admin"}, "issued_at":
   "2014-06-10T20:52:58.852194Z"}}
@@ -231,7 +231,7 @@ Example response::
   "87057e3735d4415c97ae231b4841eb1c"}, {"url": "http://localhost:5000/v2.0",
   "region": "RegionOne", "interface": "public", "id":
   "ef303187fc8d41668f25199c298396a5"}], "type": "identity", "id":
-  "bd7397d2c0e14fb69bae8ff76e112a90", "name": "keystone"}], "extras": {},
+  "bd7397d2c0e14fb69bae8ff76e112a90", "name": "sidserver"}], "extras": {},
   "user": {"domain": {"id": "default", "name": "Default"}, "id":
   "3ec3164f750146be97f21559ee4d9c51", "name": "admin"}, "issued_at":
   "2014-06-10T21:00:05.548559Z"}}
@@ -430,7 +430,7 @@ Example response:
                 "links": {
                     "self": "http://localhost:5000/v3/services/bd7397d2c0e14fb69bae8ff76e112a90"
                 },
-                "name": "keystone",
+                "name": "sidserver",
                 "type": "identity"
             }
         ]
@@ -743,7 +743,7 @@ Admin API Examples Using Curl
 -----------------------------
 
 These examples assume a default port value of 35357, and depend on the
-``sampledata`` bundled with keystone.
+``sampledata`` bundled with sidserver.
 
 GET /
 =====
@@ -1125,8 +1125,8 @@ Get the revocation list:
       http://localhost:35357/v2.0/tokens/revoked |
      jq -r .signed |
      openssl cms -verify \
-      -certfile /etc/keystone/ssl/certs/signing_cert.pem \
-      -CAfile /etc/keystone/ssl/certs/ca.pem \
+      -certfile /etc/sidserver/ssl/certs/signing_cert.pem \
+      -CAfile /etc/sidserver/ssl/certs/ca.pem \
       -inform PEM \
       -nosmimecap -nodetach -nocerts -noattr 2>/dev/null |
      python -m json.tool

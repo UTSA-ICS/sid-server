@@ -64,7 +64,7 @@ I am a deployer
 ---------------
 
 You'll need to ensure the v3 API is included in your Paste pipeline, usually
-``etc/keystone-paste.ini``. Our `latest sample configuration`_ includes the v3
+``etc/sidserver-paste.ini``. Our `latest sample configuration`_ includes the v3
 application pipeline.
 
 First define a v3 application, which refers to the v3 application factory
@@ -73,7 +73,7 @@ method:
 .. code-block:: ini
 
     [app:service_v3]
-    paste.app_factory = keystone.service:v3_app_factory
+    paste.app_factory = sidserver.service:v3_app_factory
 
 Then define a v3 pipeline, which terminates with the v3 application you defined
 above:
@@ -125,7 +125,7 @@ Keystone clients can use to automatically detect available API versions.
 With unversioned ``identity`` endpoints in the service catalog, you should be
 able to `authenticate with keystoneclient`_ successfully.
 
-.. _`latest sample configuration`: https://github.com/openstack/keystone/blob/master/etc/keystone-paste.ini
+.. _`latest sample configuration`: https://github.com/openstack/sidserver/blob/master/etc/sidserver-paste.ini
 .. _`authenticate with keystoneclient`: http://docs.openstack.org/developer/python-keystoneclient/using-api-v3.html#authenticating
 
 I have a Python client

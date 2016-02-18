@@ -42,8 +42,8 @@ Clone the Keystone repository:
 
 .. code-block:: bash
 
-    $ git clone http://github.com/openstack/keystone.git
-    $ cd keystone
+    $ git clone http://github.com/openstack/sidserver.git
+    $ cd sidserver
 
 Install the Keystone web service:
 
@@ -54,14 +54,14 @@ Install the Keystone web service:
 You should have all the pieces you need to run Keystone installed on your
 system. The following commands should be available on the command-line path:
 
-* ``keystone`` the Keystone client, used to interact with Keystone
-* ``keystone-manage`` used to bootstrap Keystone data
-* ``keystone-all`` used to run the Keystone services
+* ``sidserver`` the Keystone client, used to interact with Keystone
+* ``sidserver-manage`` used to bootstrap Keystone data
+* ``sidserver-all`` used to run the Keystone services
 
 You will find sample configuration files in ``etc/``:
 
-* ``keystone.conf``
-* ``keystone-paste.ini``
+* ``sidserver.conf``
+* ``sidserver-paste.ini``
 * ``logging.conf``
 * ``policy.json``
 * ``default_catalog.templates``
@@ -72,7 +72,7 @@ the command:
 
 .. code-block:: bash
 
-    $ keystone-all
+    $ sidserver-all
 
 By default, this will show logging on the console from which it was started.
 Once started, you can initialize data in Keystone for use with the rest of
@@ -85,23 +85,23 @@ but all of the core OpenStack projects.
 .. _DEVSTACK: http://devstack.org/
 
 The script with the latest examples of initializing data in Keystone is a
-bash script called keystone_data.sh_
+bash script called sidserver_data.sh_
 
-.. _keystone_data.sh: https://github.com/openstack-dev/devstack/blob/master/files/keystone_data.sh
+.. _sidserver_data.sh: https://github.com/openstack-dev/devstack/blob/master/files/sidserver_data.sh
 
 Installing from packages: Ubuntu
 --------------------------------
 
-Ubuntu is providing packages for Keystone for Precise. To install keystone
+Ubuntu is providing packages for Keystone for Precise. To install sidserver
 on Ubuntu:
 
 .. code-block:: bash
 
-    $ sudo apt-get install keystone
+    $ sudo apt-get install sidserver
 
 In using Ubuntu's packages, the packages will set up a user account for
-the Keystone service (`keystone`), and place default configurations in
-``/etc/keystone``. The Debian installer will also ask you about configuration
+the Keystone service (`sidserver`), and place default configurations in
+``/etc/sidserver``. The Debian installer will also ask you about configuration
 options for setting up and running Keystone. As of this writing, the defaults
 for Keystone backends are all SQL based, stored locally in a SQLite.
 
@@ -118,9 +118,9 @@ To install the packages:
 
 .. code-block:: bash
 
-    $ sudo yum install openstack-keystone
+    $ sudo yum install openstack-sidserver
 
 Once installed, you still need to initialize data in Keystone, which you can
 find described in :doc:`configuringservices`.
 
-.. _`OpenStack Install Guide`: http://docs.openstack.org/juno/install-guide/install/yum/content/keystone-install.html
+.. _`OpenStack Install Guide`: http://docs.openstack.org/juno/install-guide/install/yum/content/sidserver-install.html

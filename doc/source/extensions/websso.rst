@@ -20,10 +20,10 @@ Keystone Federation and Horizon
 Keystone Changes
 ================
 
-1. Update `trusted_dashboard` in keystone.conf.
+1. Update `trusted_dashboard` in sidserver.conf.
 
 Specify URLs of trusted horizon servers. This value may be repeated
-multiple times. This setting ensures that keystone only sends token data back
+multiple times. This setting ensures that sidserver only sends token data back
 to trusted servers. This is performed as a precaution, specifically to
 prevent man-in-the-middle (MITM) attacks.
 
@@ -37,7 +37,7 @@ prevent man-in-the-middle (MITM) attacks.
 
 The `/v3/auth/OS-FEDERATION/websso/` route must be protected by the chosen
 httpd module. This is performed so the request that originates from horizon
-will use the same identity provider that is configured in keystone.
+will use the same identity provider that is configured in sidserver.
 
 If `mod_shib` is used, then use the following as an example:
 
@@ -86,7 +86,7 @@ If `mod_auth_kerb` is used, then use the following as an example:
       </LocationMatch>
   </VirtualHost>
 
-3. Update `remote_id_attribute` in keystone.conf.
+3. Update `remote_id_attribute` in sidserver.conf.
 
 A remote id attribute indicates the header to retrieve from the WSGI
 environment. This header contains information about the identity
@@ -110,14 +110,14 @@ Alternatively, a generic option may be set at the `[federation]` level.
   [federation]
   remote_id_attribute = HTTP_OIDC_ISS
 
-4. Set `remote_ids` for a keystone identity provider using the API or CLI.
+4. Set `remote_ids` for a sidserver identity provider using the API or CLI.
 
-A keystone identity provider may have multiple `remote_ids` specified, this
-allows the same *keystone* identity provider resource to be used with multiple
+A sidserver identity provider may have multiple `remote_ids` specified, this
+allows the same *sidserver* identity provider resource to be used with multiple
 external identity providers. For example, an identity provider resource
 ``university-idp``, may have the following `remote_ids`:
 ``['university-x', 'university-y', 'university-z']``.
-This removes the need to configure N identity providers in keystone.
+This removes the need to configure N identity providers in sidserver.
 
 This can be performed using the `OS-FEDERATION API`_:
 ``PATCH /OS-FEDERATION/identity_providers/{idp_id}``
@@ -132,7 +132,7 @@ Or by using the `OpenStackClient CLI`_:
 
     Remote IDs are globally unique. Two identity providers cannot be
     associated with the same remote ID. Once authenticated with the external
-    identity provider, keystone will determine which identity provider
+    identity provider, sidserver will determine which identity provider
     and mapping to use based on the protocol and the value returned from the
     `remote_id_attribute` key.
 
@@ -145,10 +145,10 @@ Or by using the `OpenStackClient CLI`_:
     The motivation for this approach is that there will always be some data
     sent by the identity provider (in the assertion or claim) that uniquely
     identifies the identity provider. This removes the requirement for horizon
-    to list all the identity providers that are trusted by keystone.
+    to list all the identity providers that are trusted by sidserver.
 
 .. _`OpenStackClient CLI`: http://docs.openstack.org/developer/python-openstackclient/command-objects/identity-provider.html#identity-provider-set
-.. _`OS-FEDERATION API`: http://specs.openstack.org/openstack/keystone-specs/api/v3/identity-api-v3-os-federation-ext.html#update-identity-provider
+.. _`OS-FEDERATION API`: http://specs.openstack.org/openstack/sidserver-specs/api/v3/identity-api-v3-os-federation-ext.html#update-identity-provider
 
 Horizon Changes
 ===============
@@ -190,9 +190,9 @@ this will provide users with an updated login screen for horizon.
    `WEBSSO_CHOICES` option.
 
 Within horizon's settings.py file, a list of supported authentication methods
-can be specified. The entries in the list map to keystone federation protocols,
+can be specified. The entries in the list map to sidserver federation protocols,
 with the exception of ``credentials`` which is reserved by horizon, and maps to
-the user name and password used by keystone's identity backend.
+the user name and password used by sidserver's identity backend.
 
 .. code-block:: python
 

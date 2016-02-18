@@ -21,13 +21,13 @@ Enabling the Endpoint Filter Extension
 To enable the endpoint filter extension:
 
 1. Add the endpoint filter extension catalog driver to the ``[catalog]`` section
-   in ``keystone.conf``. For example::
+   in ``sidserver.conf``. For example::
 
     [catalog]
-    driver = keystone.contrib.endpoint_filter.backends.catalog_sql.EndpointFilterCatalog
+    driver = sidserver.contrib.endpoint_filter.backends.catalog_sql.EndpointFilterCatalog
 
 2. Add the ``endpoint_filter_extension`` filter to the ``api_v3`` pipeline in
-   ``keystone-paste.ini``. This must be added after ``json_body`` and before
+   ``sidserver-paste.ini``. This must be added after ``json_body`` and before
    the last entry in the pipeline. For example::
 
     [pipeline:api_v3]
@@ -35,10 +35,10 @@ To enable the endpoint filter extension:
 
 3. Create the endpoint filter extension tables if using the provided sql backend. For example::
 
-    ./bin/keystone-manage db_sync --extension endpoint_filter
+    ./bin/sidserver-manage db_sync --extension endpoint_filter
 
 4. Optionally, change ``return_all_endpoints_if_no_filter`` the ``[endpoint_filter]`` section
-   in ``keystone.conf`` to return an empty catalog if no associations are made. For example::
+   in ``sidserver.conf`` to return an empty catalog if no associations are made. For example::
 
     [endpoint_filter]
     return_all_endpoints_if_no_filter = False

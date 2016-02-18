@@ -1,13 +1,13 @@
 [DEFAULT]
 
 #
-# From keystone
+# From sidserver
 #
 
 # A "shared secret" that can be used to bootstrap Keystone. This "token" does
 # not represent a user, and carries no explicit authorization. To disable in
 # production (highly recommended), remove AdminTokenAuthMiddleware from your
-# paste application pipelines (for example, in keystone-paste.ini). (string
+# paste application pipelines (for example, in sidserver-paste.ini). (string
 # value)
 #admin_token = ADMIN
 
@@ -84,7 +84,7 @@
 #secure_proxy_ssl_header = <None>
 
 #
-# From keystone.notifications
+# From sidserver.notifications
 #
 
 # Default publisher_id for outgoing notifications (string value)
@@ -97,7 +97,7 @@
 #notification_format = basic
 
 #
-# From keystone.openstack.common.eventlet_backdoor
+# From sidserver.openstack.common.eventlet_backdoor
 #
 
 # Enable eventlet backdoor.  Acceptable values are 0, <port>, and
@@ -253,13 +253,13 @@
 
 # The default exchange under which topics are scoped. May be overridden by an
 # exchange name specified in the transport_url option. (string value)
-#control_exchange = keystone
+#control_exchange = sidserver
 
 
 [assignment]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Assignment backend driver. (string value)
@@ -269,35 +269,35 @@
 [auth]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Default auth methods. (list value)
 #methods = external,password,token,oauth1
 
 # The password auth plugin module. (string value)
-#password = keystone.auth.plugins.password.Password
+#password = sidserver.auth.plugins.password.Password
 
 # The token auth plugin module. (string value)
-#token = keystone.auth.plugins.token.Token
+#token = sidserver.auth.plugins.token.Token
 
 # The external (REMOTE_USER) auth plugin module. (string value)
-#external = keystone.auth.plugins.external.DefaultDomain
+#external = sidserver.auth.plugins.external.DefaultDomain
 
 # The oAuth1.0 auth plugin module. (string value)
-#oauth1 = keystone.auth.plugins.oauth1.OAuth
+#oauth1 = sidserver.auth.plugins.oauth1.OAuth
 
 
 [cache]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Prefix for building the configuration dictionary for the cache region. This
 # should not need to be changed unless there is another dogpile.cache region
 # with the same configuration name. (string value)
-#config_prefix = cache.keystone
+#config_prefix = cache.sidserver
 
 # Default TTL, in seconds, for any cached item in the dogpile.cache region.
 # This applies to any cached method that doesn't have an explicit cache
@@ -305,10 +305,10 @@
 #expiration_time = 600
 
 # Dogpile.cache backend module. It is recommended that Memcache with pooling
-# (keystone.cache.memcache_pool) or Redis (dogpile.cache.redis) be used in
+# (sidserver.cache.memcache_pool) or Redis (dogpile.cache.redis) be used in
 # production deployments.  Small workloads (single process) like devstack can
 # use the dogpile.cache.memory backend. (string value)
-#backend = keystone.common.cache.noop
+#backend = sidserver.common.cache.noop
 
 # Arguments supplied to the backend module. Specify this option once per
 # argument to be passed to the dogpile.cache backend. Example format:
@@ -331,24 +331,24 @@
 #debug_cache_backend = false
 
 # Memcache servers in the format of "host:port". (dogpile.cache.memcache and
-# keystone.cache.memcache_pool backends only). (list value)
+# sidserver.cache.memcache_pool backends only). (list value)
 #memcache_servers = localhost:11211
 
 # Number of seconds memcached server is considered dead before it is tried
-# again. (dogpile.cache.memcache and keystone.cache.memcache_pool backends
+# again. (dogpile.cache.memcache and sidserver.cache.memcache_pool backends
 # only). (integer value)
 #memcache_dead_retry = 300
 
 # Timeout in seconds for every call to a server. (dogpile.cache.memcache and
-# keystone.cache.memcache_pool backends only). (integer value)
+# sidserver.cache.memcache_pool backends only). (integer value)
 #memcache_socket_timeout = 3
 
 # Max total number of open connections to every memcached server.
-# (keystone.cache.memcache_pool backend only). (integer value)
+# (sidserver.cache.memcache_pool backend only). (integer value)
 #memcache_pool_maxsize = 10
 
 # Number of seconds a connection to memcached is held unused in the pool before
-# it is closed. (keystone.cache.memcache_pool backend only). (integer value)
+# it is closed. (sidserver.cache.memcache_pool backend only). (integer value)
 #memcache_pool_unused_timeout = 60
 
 # Number of seconds that an operation will wait to get a memcache client
@@ -359,7 +359,7 @@
 [catalog]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Catalog template file name for use with the template catalog backend. (string
@@ -367,7 +367,7 @@
 #template_file = default_catalog.templates
 
 # Catalog backend driver. (string value)
-#driver = keystone.catalog.backends.sql.Catalog
+#driver = sidserver.catalog.backends.sql.Catalog
 
 # Toggle for catalog caching. This has no effect unless global caching is
 # enabled. (boolean value)
@@ -385,11 +385,11 @@
 [credential]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Credential backend driver. (string value)
-#driver = keystone.credential.backends.sql.Credential
+#driver = sidserver.credential.backends.sql.Credential
 
 
 [database]
@@ -495,11 +495,11 @@
 [domain_config]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Domain config backend driver. (string value)
-#driver = keystone.resource.config_backends.sql.DomainConfig
+#driver = sidserver.resource.config_backends.sql.DomainConfig
 
 # Toggle for domain config caching. This has no effect unless global caching is
 # enabled. (boolean value)
@@ -513,11 +513,11 @@
 [endpoint_filter]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Endpoint Filter backend driver (string value)
-#driver = keystone.contrib.endpoint_filter.backends.sql.EndpointFilter
+#driver = sidserver.contrib.endpoint_filter.backends.sql.EndpointFilter
 
 # Toggle to return all active endpoints if no filter exists. (boolean value)
 #return_all_endpoints_if_no_filter = true
@@ -526,17 +526,17 @@
 [endpoint_policy]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Endpoint policy backend driver (string value)
-#driver = keystone.contrib.endpoint_policy.backends.sql.EndpointPolicy
+#driver = sidserver.contrib.endpoint_policy.backends.sql.EndpointPolicy
 
 
 [eventlet_server]
 
 #
-# From keystone
+# From sidserver
 #
 
 # The number of worker processes to serve the public eventlet application.
@@ -584,7 +584,7 @@
 [eventlet_server_ssl]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Toggle for SSL support on the Keystone eventlet servers. (boolean value)
@@ -592,18 +592,18 @@
 #enable = false
 
 # Path of the certfile for SSL. For non-production environments, you may be
-# interested in using `keystone-manage ssl_setup` to generate self-signed
+# interested in using `sidserver-manage ssl_setup` to generate self-signed
 # certificates. (string value)
 # Deprecated group/name - [ssl]/certfile
-#certfile = /etc/keystone/ssl/certs/keystone.pem
+#certfile = /etc/sidserver/ssl/certs/sidserver.pem
 
 # Path of the keyfile for SSL. (string value)
 # Deprecated group/name - [ssl]/keyfile
-#keyfile = /etc/keystone/ssl/private/keystonekey.pem
+#keyfile = /etc/sidserver/ssl/private/sidserverkey.pem
 
 # Path of the CA cert file for SSL. (string value)
 # Deprecated group/name - [ssl]/ca_certs
-#ca_certs = /etc/keystone/ssl/certs/ca.pem
+#ca_certs = /etc/sidserver/ssl/certs/ca.pem
 
 # Require client certificate. (boolean value)
 # Deprecated group/name - [ssl]/cert_required
@@ -613,11 +613,11 @@
 [federation]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Federation backend driver. (string value)
-#driver = keystone.contrib.federation.backends.sql.Federation
+#driver = sidserver.contrib.federation.backends.sql.Federation
 
 # Value to be used when filtering assertion parameters from the environment.
 # (string value)
@@ -645,21 +645,21 @@
 
 # Location of Single Sign-On callback handler, will return a token to a trusted
 # dashboard host. (string value)
-#sso_callback_template = /etc/keystone/sso_callback_template.html
+#sso_callback_template = /etc/sidserver/sso_callback_template.html
 
 
 [fernet_tokens]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Directory containing Fernet token keys. (string value)
-#key_repository = /etc/keystone/fernet-keys/
+#key_repository = /etc/sidserver/fernet-keys/
 
-# This controls how many keys are held in rotation by keystone-manage
+# This controls how many keys are held in rotation by sidserver-manage
 # fernet_rotate before they are discarded. The default value of 3 means that
-# keystone will maintain one staged key, one primary key, and one secondary
+# sidserver will maintain one staged key, one primary key, and one secondary
 # key. Increasing this value means that additional secondary keys will be kept
 # in the rotation. (integer value)
 #max_active_keys = 3
@@ -668,12 +668,12 @@
 [identity]
 
 #
-# From keystone
+# From sidserver
 #
 
 # This references the domain to use for all Identity API v2 requests (which are
 # not aware of domains). A domain with this ID will be created for you by
-# keystone-manage db_sync in migration 008. The domain referenced by this ID
+# sidserver-manage db_sync in migration 008. The domain referenced by this ID
 # cannot be deleted on the v3 API, to prevent accidentally breaking the v2 API.
 # There is nothing special about this domain, other than the fact that it must
 # exist to order to maintain support for your v2 clients. (string value)
@@ -696,10 +696,10 @@
 
 # Path for Keystone to locate the domain specific identity configuration files
 # if domain_specific_drivers_enabled is set to true. (string value)
-#domain_config_dir = /etc/keystone/domains
+#domain_config_dir = /etc/sidserver/domains
 
 # Identity backend driver. (string value)
-#driver = keystone.identity.backends.sql.Identity
+#driver = sidserver.identity.backends.sql.Identity
 
 # Toggle for identity caching. This has no effect unless global caching is
 # enabled. (boolean value)
@@ -721,19 +721,19 @@
 [identity_mapping]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Keystone Identity Mapping backend driver. (string value)
-#driver = keystone.identity.mapping_backends.sql.Mapping
+#driver = sidserver.identity.mapping_backends.sql.Mapping
 
 # Public ID generator for user and group entities. The Keystone identity mapper
 # only supports generators that produce no more than 64 characters. (string
 # value)
-#generator = keystone.identity.id_generators.sha256.Generator
+#generator = sidserver.identity.id_generators.sha256.Generator
 
 # The format of user and group IDs changed in Juno for backends that do not
-# generate UUIDs (e.g. LDAP), with keystone providing a hash mapping to the
+# generate UUIDs (e.g. LDAP), with sidserver providing a hash mapping to the
 # underlying attribute in LDAP. By default this mapping is disabled, which
 # ensures that existing IDs will not change. Even when the mapping is enabled
 # by using domain specific drivers, any users and groups from the default
@@ -751,7 +751,7 @@
 [kvs]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Extra dogpile.cache backend modules to register with the dogpile.cache
@@ -761,7 +761,7 @@
 # Prefix for building the configuration dictionary for the KVS region. This
 # should not need to be changed unless there is another dogpile.cache region
 # with the same configuration name. (string value)
-#config_prefix = keystone.kvs
+#config_prefix = sidserver.kvs
 
 # Toggle to disable using a key-mangling function to ensure fixed length keys.
 # This is toggle-able for debugging purposes, it is highly recommended to
@@ -775,7 +775,7 @@
 [ldap]
 
 #
-# From keystone
+# From sidserver
 #
 
 # URL for connecting to the LDAP server. (string value)
@@ -1118,7 +1118,7 @@
 [memcache]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Memcache servers in the format of "host:port". (list value)
@@ -1153,11 +1153,11 @@
 [oauth1]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Credential backend driver. (string value)
-#driver = keystone.contrib.oauth1.backends.sql.OAuth1
+#driver = sidserver.contrib.oauth1.backends.sql.OAuth1
 
 # Duration (in seconds) for the OAuth Request Token. (integer value)
 #request_token_duration = 28800
@@ -1169,7 +1169,7 @@
 [os_inherit]
 
 #
-# From keystone
+# From sidserver
 #
 
 # role-assignment inheritance to projects from owning domain or from projects
@@ -1436,22 +1436,22 @@
 [paste_deploy]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Name of the paste configuration file that defines the available pipelines.
 # (string value)
-#config_file = keystone-paste.ini
+#config_file = sidserver-paste.ini
 
 
 [policy]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Policy backend driver. (string value)
-#driver = keystone.policy.backends.sql.Policy
+#driver = sidserver.policy.backends.sql.Policy
 
 # Maximum number of entities that will be returned in a policy collection.
 # (integer value)
@@ -1461,7 +1461,7 @@
 [resource]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Resource backend driver. If a resource driver is not specified, the
@@ -1487,12 +1487,12 @@
 [revoke]
 
 #
-# From keystone
+# From sidserver
 #
 
 # An implementation of the backend for persisting revocation events. (string
 # value)
-#driver = keystone.contrib.revoke.backends.sql.Revoke
+#driver = sidserver.contrib.revoke.backends.sql.Revoke
 
 # This value (calculated in seconds) is added to token expiration before a
 # revocation event may be removed from the backend. (integer value)
@@ -1512,7 +1512,7 @@
 [role]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Role backend driver. (string value)
@@ -1534,7 +1534,7 @@
 [saml]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Default TTL, in seconds, for any generated SAML assertion created by
@@ -1547,22 +1547,22 @@
 #xmlsec1_binary = xmlsec1
 
 # Path of the certfile for SAML signing. For non-production environments, you
-# may be interested in using `keystone-manage pki_setup` to generate self-
+# may be interested in using `sidserver-manage pki_setup` to generate self-
 # signed certificates. Note, the path cannot contain a comma. (string value)
-#certfile = /etc/keystone/ssl/certs/signing_cert.pem
+#certfile = /etc/sidserver/ssl/certs/signing_cert.pem
 
 # Path of the keyfile for SAML signing. Note, the path cannot contain a comma.
 # (string value)
-#keyfile = /etc/keystone/ssl/private/signing_key.pem
+#keyfile = /etc/sidserver/ssl/private/signing_key.pem
 
 # Entity ID value for unique Identity Provider identification. Usually FQDN is
 # set with a suffix. A value is required to generate IDP Metadata. For example:
-# https://keystone.example.com/v3/OS-FEDERATION/saml2/idp (string value)
+# https://sidserver.example.com/v3/OS-FEDERATION/saml2/idp (string value)
 #idp_entity_id = <None>
 
 # Identity Provider Single-Sign-On service value, required in the Identity
 # Provider's metadata. A value is required to generate IDP Metadata. For
-# example: https://keystone.example.com/v3/OS-FEDERATION/saml2/sso (string
+# example: https://sidserver.example.com/v3/OS-FEDERATION/saml2/sso (string
 # value)
 #idp_sso_endpoint = <None>
 
@@ -1598,8 +1598,8 @@
 #idp_contact_type = other
 
 # Path to the Identity Provider Metadata file. This file should be generated
-# with the keystone-manage saml_idp_metadata command. (string value)
-#idp_metadata_path = /etc/keystone/saml2_idp_metadata.xml
+# with the sidserver-manage saml_idp_metadata command. (string value)
+#idp_metadata_path = /etc/sidserver/saml2_idp_metadata.xml
 
 # The prefix to use for the RelayState SAML attribute, used when generating ECP
 # wrapped assertions. (string value)
@@ -1609,22 +1609,22 @@
 [signing]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Path of the certfile for token signing. For non-production environments, you
-# may be interested in using `keystone-manage pki_setup` to generate self-
+# may be interested in using `sidserver-manage pki_setup` to generate self-
 # signed certificates. (string value)
-#certfile = /etc/keystone/ssl/certs/signing_cert.pem
+#certfile = /etc/sidserver/ssl/certs/signing_cert.pem
 
 # Path of the keyfile for token signing. (string value)
-#keyfile = /etc/keystone/ssl/private/signing_key.pem
+#keyfile = /etc/sidserver/ssl/private/signing_key.pem
 
 # Path of the CA for token signing. (string value)
-#ca_certs = /etc/keystone/ssl/certs/ca.pem
+#ca_certs = /etc/sidserver/ssl/certs/ca.pem
 
 # Path of the CA key for token signing. (string value)
-#ca_key = /etc/keystone/ssl/private/cakey.pem
+#ca_key = /etc/sidserver/ssl/private/cakey.pem
 
 # Key size (in bits) for token signing cert (auto generated certificate).
 # (integer value)
@@ -1642,11 +1642,11 @@
 [ssl]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Path of the CA key file for SSL. (string value)
-#ca_key = /etc/keystone/ssl/private/cakey.pem
+#ca_key = /etc/sidserver/ssl/private/cakey.pem
 
 # SSL key length (in bits) (auto generated certificate). (integer value)
 #key_size = 1024
@@ -1662,7 +1662,7 @@
 [token]
 
 #
-# From keystone
+# From sidserver
 #
 
 # External auth mechanisms that should add bind information to token, e.g.,
@@ -1679,12 +1679,12 @@
 #expiration = 3600
 
 # Controls the token construction, validation, and revocation operations. Core
-# providers are "keystone.token.providers.[fernet|pkiz|pki|uuid].Provider".
+# providers are "sidserver.token.providers.[fernet|pkiz|pki|uuid].Provider".
 # (string value)
-#provider = keystone.token.providers.uuid.Provider
+#provider = sidserver.token.providers.uuid.Provider
 
 # Token persistence backend driver. (string value)
-#driver = keystone.token.persistence.backends.sql.Token
+#driver = sidserver.token.persistence.backends.sql.Token
 
 # Toggle for token system caching. This has no effect unless global caching is
 # enabled. (boolean value)
@@ -1716,7 +1716,7 @@
 [trust]
 
 #
-# From keystone
+# From sidserver
 #
 
 # Delegation and impersonation features can be optionally disabled. (boolean
@@ -1730,4 +1730,4 @@
 #max_redelegation_count = 3
 
 # Trust backend driver. (string value)
-#driver = keystone.trust.backends.sql.Trust
+#driver = sidserver.trust.backends.sql.Trust

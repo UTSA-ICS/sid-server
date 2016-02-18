@@ -8,7 +8,7 @@ OpenStack's Identity Service.
 Identity
 ========
 
-The Identity portion of keystone includes ``Users`` and ``Groups``, and may be
+The Identity portion of sidserver includes ``Users`` and ``Groups``, and may be
 backed by SQL or more commonly LDAP.
 
 Users
@@ -28,7 +28,7 @@ globally unique, but only unique to their domain.
 Resources
 =========
 
-The Identity portion of keystone includes ``Projects`` and ``Domains``, and
+The Identity portion of sidserver includes ``Projects`` and ``Domains``, and
 are commonly stored in an SQL backend.
 
 Projects (Tenants)
@@ -47,7 +47,7 @@ Domains
 
 ``Domains`` are a high-level container for projects, users and groups. Each is
 owned by exactly one domain. Each domain defines a namespace where certain an
-API-visible name attribute exists. keystone provides a default domain, aptly
+API-visible name attribute exists. sidserver provides a default domain, aptly
 named 'Default'.
 
 In the Identity v3 API, the uniqueness of attributes is as follows:
@@ -85,7 +85,7 @@ A 3-tuple that has a ``Role``, a ``Resource`` and an ``Identity``.
 What's needed to Authenticate?
 ==============================
 
-Two pieces of information are required to authenticate with keystone, a
+Two pieces of information are required to authenticate with sidserver, a
 bit of ``Resource`` information and a bit of ``Identity``.
 
 Take the following call POST data for instance:

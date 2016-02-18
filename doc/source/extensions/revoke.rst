@@ -24,17 +24,17 @@ Enabling the Revocation Extension
     migrated, thus it is not necessary to perform steps 3.
 
 1. Optionally, add the revoke extension driver to the ``[revoke]`` section
-   in ``keystone.conf``. For example::
+   in ``sidserver.conf``. For example::
 
     [revoke]
-    driver = keystone.contrib.revoke.backends.sql.Revoke
+    driver = sidserver.contrib.revoke.backends.sql.Revoke
 
-2. Add the required ``filter`` to the ``pipeline`` in ``keystone-paste.ini``.
+2. Add the required ``filter`` to the ``pipeline`` in ``sidserver-paste.ini``.
    This must be added after ``json_body`` and before the last entry in the
    pipeline. For example::
 
     [filter:revoke_extension]
-    paste.filter_factory = keystone.contrib.revoke.routers:RevokeExtension.factory
+    paste.filter_factory = sidserver.contrib.revoke.routers:RevokeExtension.factory
 
     [pipeline:api_v3]
     pipeline = sizelimit url_normalize build_auth_context token_auth admin_token_auth json_body ec2_extension_v3 s3_extension simple_cert_extension revoke_extension service_v3
@@ -42,4 +42,4 @@ Enabling the Revocation Extension
 3. Create the revocation extension tables if using the provided SQL backend.
    For example::
 
-    ./bin/keystone-manage db_sync --extension revoke
+    ./bin/sidserver-manage db_sync --extension revoke

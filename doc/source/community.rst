@@ -32,13 +32,13 @@ through Launchpad_, the wiki_, or blogs. We welcome all types of contributions,
 
 from blueprint designs to documentation to testing to deployment scripts.
 
-.. _Launchpad: https://launchpad.net/keystone
+.. _Launchpad: https://launchpad.net/sidserver
 .. _wiki: http://wiki.openstack.org/
 
-#openstack-keystone on Freenode IRC Network
+#openstack-sidserver on Freenode IRC Network
 -------------------------------------------
 
-You can find Keystone folks in `<irc://freenode.net/#openstack-keystone>`_.
+You can find Keystone folks in `<irc://freenode.net/#openstack-sidserver>`_.
 This is usually the best place to ask questions and find your way around. IRC
 stands for Internet Relay Chat and it is a way to chat online in real time.
 You can also ask a question and come back to the log files to read the answer
@@ -67,15 +67,15 @@ Launchpad is a code hosting that OpenStack is using to track bugs, feature
 work, and releases of OpenStack. Like other OpenStack projects, Keystone source
 code is hosted on GitHub
 
-* `Keystone Project Page on Launchpad <http://launchpad.net/keystone>`_
-* `Keystone Source Repository on GitHub <http://github.com/openstack/keystone>`_
+* `Keystone Project Page on Launchpad <http://launchpad.net/sidserver>`_
+* `Keystone Source Repository on GitHub <http://github.com/openstack/sidserver>`_
 
 Within launchpad, we use
-`blueprints <https://blueprints.launchpad.net/keystone>`_, to track feature
-work, and track `bugs <https://bugs.launchpad.net/keystone>`_ as well. If
-you are looking for a place to get started contributing to keystone, please
+`blueprints <https://blueprints.launchpad.net/sidserver>`_, to track feature
+work, and track `bugs <https://bugs.launchpad.net/sidserver>`_ as well. If
+you are looking for a place to get started contributing to sidserver, please
 look at any bugs for Keystone that are tagged as `low-hanging-fruit
-<https://bugs.launchpad.net/keystone/+bugs?field.tag=low-hanging-fruit>`_.
+<https://bugs.launchpad.net/sidserver/+bugs?field.tag=low-hanging-fruit>`_.
 
 OpenStack Blog
 --------------

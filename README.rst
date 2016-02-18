@@ -1,48 +1,48 @@
 ===========
-sid-server
+sidserver
 ===========
 
 SID-SERVER service for Openstack
 
 This service will act as a SID Server for Security Based Resource Sharing<br>
 
-First you will need to download the sid-server project:
+First you will need to download the sidserver project:
 
 a.) cd /opt/stack
 
-b.) git clone https://github.com/UTSA-ICS/sid-server.git
+b.) git clone https://github.com/UTSA-ICS/sidserver.git
 
-c.) sudo mkdir /etc/sid-server/
+c.) sudo mkdir /etc/sidserver/
 
 To be able to use this service do the following:
 
-1.) Copy sid-server/etc to /etc/sid-server:
+1.) Copy sidserver/etc to /etc/sidserver:
 
-    sudo cp /opt/stack/sid-server/etc/* /etc/sid-server/.
+    sudo cp /opt/stack/sidserver/etc/* /etc/sidserver/.
 
-2.) Create a directory called /var/cache/sid-server and give it 777 permission:
+2.) Create a directory called /var/cache/sidserver and give it 777 permission:
 
-    sudo mkdir /var/cache/sid-server
+    sudo mkdir /var/cache/sidserver
     
-    sudo chmod 777 /var/cache/sid-server
+    sudo chmod 777 /var/cache/sidserver
 
-3.) Create a user [sid-server] with password [admin] in the service tenant with 'admin' role:
+3.) Create a user [sidserver] with password [admin] in the service tenant with 'admin' role:
 
-    openstack user create --password admin --enable sid-server
+    openstack user create --password admin --enable sidserver
     
-    openstack role add --project service --user "sid-server" admin
+    openstack role add --project service --user "sidserver" admin
     
-4.) Create a service called 'sid-server' in Keystone:
+4.) Create a service called 'sidserver' in Keystone:
 
-    openstack service create --name "sid-server" --description "SID Server" --enable sid-server
+    openstack service create --name "sidserver" --description "SID Server" --enable sidserver
     
 5.) To start the SID-SERVER service run the following commands:
 
-    cd /opt/stack; sudo pip install -e rebac
+    cd /opt/stack; sudo pip install -e sidserver
     
-    cd /opt/stack/sid-server; /opt/stack/sid-server/bin/sid-server-api --config-file=/etc/rebac/sid-server-api.conf || touch "/opt/stack/status/stack/sid-server-api.failure"
+    cd /opt/stack/sidserver; /opt/stack/sidserver/bin/sidserver-api --config-file=/etc/sidserver/g/sidserver-api.conf || touch "/opt/stack/status/stack/sidserver-api.failure"
 
-6.) Verify sid-server service running in screen
+6.) Verify sidserver service running in screen
 
 To Test Usage:
 ==============

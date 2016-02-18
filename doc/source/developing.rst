@@ -35,7 +35,7 @@ that can be used to get started:
 
 .. code-block:: bash
 
-    $ cp etc/keystone.conf.sample etc/keystone.conf
+    $ cp etc/sidserver.conf.sample etc/sidserver.conf
 
 The defaults are enough to get you going, but you can make any changes if
 needed.
@@ -48,7 +48,7 @@ To run the Keystone Admin and API server instances, use:
 
 .. code-block:: bash
 
-    $ tools/with_venv.sh bin/keystone-all
+    $ tools/with_venv.sh bin/sidserver-all
 
 This runs Keystone with the configuration the etc/ directory of the project.
 See :doc:`configuration` for details on how Keystone is configured. By default,
@@ -59,7 +59,7 @@ Interacting with Keystone
 -------------------------
 
 You can interact with Keystone through the command line using
-:doc:`man/keystone-manage` which allows you to initialize keystone, etc.
+:doc:`man/sidserver-manage` which allows you to initialize sidserver, etc.
 
 You can also interact with Keystone through its REST API. There is a Python
 Keystone client library `python-keystoneclient`_ which interacts exclusively
@@ -72,7 +72,7 @@ place:
 
 .. code-block:: bash
 
-    $ bin/keystone-manage db_sync
+    $ bin/sidserver-manage db_sync
 
 .. _`python-keystoneclient`: https://github.com/openstack/python-keystoneclient
 
@@ -93,7 +93,7 @@ Database Schema Migrations
 
 Keystone uses SQLAlchemy-migrate_ to migrate the SQL database between
 revisions. For core components, the migrations are kept in a central
-repository under ``keystone/common/sql/migrate_repo/versions``. Each
+repository under ``sidserver/common/sql/migrate_repo/versions``. Each
 SQL migration has a version which can be identified by the name of
 the script, the version is the number before the underline.
 For example, if the script is named ``001_add_X_table.py`` then the
@@ -101,13 +101,13 @@ version of the SQL migration is ``1``.
 
 .. _SQLAlchemy-migrate: http://code.google.com/p/sqlalchemy-migrate/
 
-Extensions should be created as directories under ``keystone/contrib``. An
+Extensions should be created as directories under ``sidserver/contrib``. An
 extension that requires SQL migrations should not change the common repository,
 but should instead have its own repository. This repository must be in the
-extension's directory in ``keystone/contrib/<extension>/migrate_repo``. In
+extension's directory in ``sidserver/contrib/<extension>/migrate_repo``. In
 addition, it needs a subdirectory named ``versions``. For example, if the
 extension name is ``my_extension`` then the directory structure would be
-``keystone/contrib/my_extension/migrate_repo/versions/``.
+``sidserver/contrib/my_extension/migrate_repo/versions/``.
 
 For the migration to work, both the ``migrate_repo`` and ``versions``
 subdirectories must have ``__init__.py`` files. SQLAlchemy-migrate will look
@@ -120,14 +120,14 @@ the minimal set of values is::
     version_table=migrate_version
     required_dbs=[]
 
-The directory ``keystone/contrib/example`` contains a sample extension
+The directory ``sidserver/contrib/example`` contains a sample extension
 migration.
 
 For core components, to run a migration for upgrade, simply run:
 
 .. code-block:: bash
 
-    $ keystone-manage db_sync <version>
+    $ sidserver-manage db_sync <version>
 
 .. NOTE::
 
@@ -138,7 +138,7 @@ To run a migration for a specific extension, simply run:
 
 .. code-block:: bash
 
-    $ keystone-manage db_sync --extension <name>
+    $ sidserver-manage db_sync --extension <name>
 
 .. NOTE::
 
@@ -154,7 +154,7 @@ Initial Sample Data
 -------------------
 
 There is an included script which is helpful in setting up some initial sample
-data for use with keystone:
+data for use with sidserver:
 
 .. code-block:: bash
 
@@ -162,14 +162,14 @@ data for use with keystone:
 
 Notice it requires a service token read from an environment variable for
 authentication.  The default value "ADMIN" is from the ``admin_token``
-option in the ``[DEFAULT]`` section in ``etc/keystone.conf``.
+option in the ``[DEFAULT]`` section in ``etc/sidserver.conf``.
 
 Once run, you can see the sample data that has been created by using the
 `python-keystoneclient`_ command-line interface:
 
 .. code-block:: bash
 
-    $ tools/with_venv.sh keystone --os-token ADMIN --os-endpoint http://127.0.0.1:35357/v2.0/ user-list
+    $ tools/with_venv.sh sidserver --os-token ADMIN --os-endpoint http://127.0.0.1:35357/v2.0/ user-list
 
 Filtering responsibilities between controllers and drivers
 ----------------------------------------------------------
@@ -290,7 +290,7 @@ you'll normally only want to run the test that hits your breakpoint:
 
 .. code-block:: bash
 
-    $ tox -e debug keystone.tests.test_auth.AuthWithToken.test_belongs_to
+    $ tox -e debug sidserver.tests.test_auth.AuthWithToken.test_belongs_to
 
 For reference, the ``debug`` tox environment implements the instructions
 here: https://wiki.openstack.org/wiki/Testr#Debugging_.28pdb.29_Tests
@@ -358,9 +358,9 @@ backward) in a database under version control:
 
 .. code-block:: bash
 
-    $ python keystone/common/sql/migrate_repo/manage.py test \
+    $ python sidserver/common/sql/migrate_repo/manage.py test \
     --url=sqlite:///test.db \
-    --repository=keystone/common/sql/migrate_repo/
+    --repository=sidserver/common/sql/migrate_repo/
 
 This command references to a SQLite database (test.db) to be used. Depending on
 the migration, this command alone does not make assertions as to the integrity
@@ -405,11 +405,11 @@ and set environment variables ``KEYSTONE_IDENTITY_BACKEND=ldap`` and
 ``KEYSTONE_CLEAR_LDAP=yes`` in your ``localrc`` file.
 
 The unit tests can be run against a live server with
-``keystone/tests/test_ldap_livetest.py`` and
-``keystone/tests/test_ldap_pool_livetest.py``. The default password is ``test``
+``sidserver/tests/test_ldap_livetest.py`` and
+``sidserver/tests/test_ldap_pool_livetest.py``. The default password is ``test``
 but if you have installed devstack with a different LDAP password, modify the
-file ``keystone/tests/config_files/backend_liveldap.conf`` and
-``keystone/tests/config_files/backend_pool_liveldap.conf`` to reflect your password.
+file ``sidserver/tests/config_files/backend_liveldap.conf`` and
+``sidserver/tests/config_files/backend_pool_liveldap.conf`` to reflect your password.
 
 .. NOTE::
     To run the live tests you need to set the environment variable ``ENABLE_LDAP_LIVE_TEST``
@@ -431,7 +431,7 @@ including:
   used to catch bug regressions and commit it before any code is
   written.
 
-The ``keystone.tests.util.wip`` decorator can be used to mark a test as
+The ``sidserver.tests.util.wip`` decorator can be used to mark a test as
 WIP. A WIP test will always be run. If the test fails then a TestSkipped
 exception is raised because we expect the test to fail. We do not pass
 the test in this case so that it doesn't count toward the number of
@@ -457,11 +457,11 @@ messages are descriptive and accurate.
 Generating Updated Sample Config File
 -------------------------------------
 
-Keystone's sample configuration file ``etc/keystone.conf.sample`` is automatically
+Keystone's sample configuration file ``etc/sidserver.conf.sample`` is automatically
 generated based upon all of the options available within Keystone. These options
 are sourced from the many files around Keystone as well as some external libraries.
 
-If new options are added, primarily located in ``keystone.common.config``, a new
+If new options are added, primarily located in ``sidserver.common.config``, a new
 sample configuration file needs to be generated. Generating a new sample configuration
 to be included in a commit run:
 
@@ -469,7 +469,7 @@ to be included in a commit run:
 
     $ tox -esample_config -r
 
-The tox command will place an updated sample config in ``etc/keystone.conf.sample``.
+The tox command will place an updated sample config in ``etc/sidserver.conf.sample``.
 
 If there is a new external library (e.g. ``oslo.messaging``) that utilizes the
 ``oslo.config`` package for configuration, it can be added to the list of libraries
@@ -483,21 +483,21 @@ The Keystone server can provide error responses translated into the language in
 the ``Accept-Language`` header of the request. In order to test this in your
 development environment, there's a couple of things you need to do.
 
-1. Build the message files. Run the following command in your keystone
+1. Build the message files. Run the following command in your sidserver
    directory:
 
 .. code-block:: bash
 
    $ python setup.py compile_catalog
 
-This will generate .mo files like keystone/locale/[lang]/LC_MESSAGES/[lang].mo
+This will generate .mo files like sidserver/locale/[lang]/LC_MESSAGES/[lang].mo
 
 2. When running Keystone, set the ``KEYSTONE_LOCALEDIR`` environment variable
-   to the keystone/locale directory. For example:
+   to the sidserver/locale directory. For example:
 
 .. code-block:: bash
 
-   $ KEYSTONE_LOCALEDIR=/opt/stack/keystone/keystone/locale keystone-all
+   $ KEYSTONE_LOCALEDIR=/opt/stack/sidserver/sidserver/locale sidserver-all
 
 Now you can get a translated error response:
 
@@ -517,7 +517,7 @@ Caching Layer
 -------------
 
 The caching layer is designed to be applied to any ``manager`` object within Keystone
-via the use of the ``on_arguments`` decorator provided in the ``keystone.common.cache``
+via the use of the ``on_arguments`` decorator provided in the ``sidserver.common.cache``
 module.  This decorator leverages `dogpile.cache`_ caching system to provide a flexible
 caching backend.
 
@@ -526,7 +526,7 @@ file to enable caching.  The easiest method to utilize the toggle within the
 configuration file is to define a ``caching`` boolean option within that manager's
 configuration section (e.g. ``identity``).  Once that option is defined you can
 pass function to the ``on_arguments`` decorator with the named argument ``should_cache_fn``.
-In the ``keystone.common.cache`` module, there is a function called ``should_cache_fn``,
+In the ``sidserver.common.cache`` module, there is a function called ``should_cache_fn``,
 which will provide a reference, to a function, that will consult the global cache
 ``enabled`` option as well as the specific manager's caching enable toggle.
 
@@ -539,7 +539,7 @@ Example use of cache and ``should_cache_fn`` (in this example, ``token`` is the 
 
 .. code-block:: python
 
-    from keystone.common import cache
+    from sidserver.common import cache
     SHOULD_CACHE = cache.should_cache_fn('token')
 
     @cache.on_arguments(should_cache_fn=SHOULD_CACHE)
@@ -567,7 +567,7 @@ Example of using a section specific ``cache_time`` (in this example, ``identity`
 
 .. code-block:: python
 
-    from keystone.common import cache
+    from sidserver.common import cache
     SHOULD_CACHE = cache.should_cache_fn('identity')
 
     @cache.on_arguments(should_cache_fn=SHOULD_CACHE,
@@ -604,10 +604,10 @@ dogpile.cache based Key-Value-Store (KVS)
 The ``dogpile.cache`` based KVS system has been designed to allow for flexible stores for the
 backend of the KVS system. The implementation allows for the use of any normal ``dogpile.cache``
 cache backends to be used as a store. All interfacing to the KVS system happens via the
-``KeyValueStore`` object located at ``keystone.common.kvs.KeyValueStore``.
+``KeyValueStore`` object located at ``sidserver.common.kvs.KeyValueStore``.
 
 To utilize the KVS system an instantiation of the ``KeyValueStore`` class is needed. To acquire
-a KeyValueStore instantiation use the ``keystone.common.kvs.get_key_value_store`` factory
+a KeyValueStore instantiation use the ``sidserver.common.kvs.get_key_value_store`` factory
 function. This factory will either create a new ``KeyValueStore`` object or retrieve the
 already instantiated ``KeyValueStore`` object by the name passed as an argument. The object must
 be configured before use. The KVS object will only be retrievable with the
@@ -722,7 +722,7 @@ collisions or exceeding key size limits with memcached).
 
 Any backends that are to be used with the ``KeyValueStore`` system need to be registered with
 dogpile. For in-tree/provided backends, the registration should occur in
-``keystone/common/kvs/__init__.py``. For backends that are developed out of tree, the location
+``sidserver/common/kvs/__init__.py``. For backends that are developed out of tree, the location
 should be added to the ``backends`` option in the ``[kvs]`` section of the Keystone configuration::
 
     [kvs]
@@ -756,7 +756,7 @@ Example of typical configuration for MongoDB backend:
         'son_manipulator': 'my_son_manipulator_impl'
     }
 
-    region.make_region().configure('keystone.cache.mongo',
+    region.make_region().configure('sidserver.cache.mongo',
                                    arguments=arguments)
 
 The optional `son_manipulator` is used to manipulate custom data type while its saved in
@@ -765,14 +765,14 @@ custom classes, then the provided implementation class is sufficient. For furthe
 http://api.mongodb.org/python/current/examples/custom_type.html#automatic-encoding-and-decoding
 
 Similar to other backends, this backend can be added via Keystone configuration in
-``keystone.conf``::
+``sidserver.conf``::
 
     [cache]
     # Global cache functionality toggle.
     enabled = True
 
     # Referring to specific cache backend
-    backend = keystone.cache.mongo
+    backend = sidserver.cache.mongo
 
     # Backend specific configuration arguments
     backend_argument = db_hosts:localhost:27017
@@ -781,7 +781,7 @@ Similar to other backends, this backend can be added via Keystone configuration 
     backend_argument = username:test_user
     backend_argument = password:test_password
 
-This backend is registered in ``keystone.common.cache.core`` module. So, its usage
+This backend is registered in ``sidserver.common.cache.core`` module. So, its usage
 is similar to other dogpile caching backends as it implements the same dogpile APIs.
 
 

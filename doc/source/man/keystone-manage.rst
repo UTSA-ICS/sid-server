@@ -1,5 +1,5 @@
 ===============
-keystone-manage
+sidserver-manage
 ===============
 
 ---------------------------
@@ -16,27 +16,27 @@ Keystone Management Utility
 SYNOPSIS
 ========
 
-  keystone-manage [options]
+  sidserver-manage [options]
 
 DESCRIPTION
 ===========
 
-``keystone-manage`` is the command line tool which interacts with the Keystone
+``sidserver-manage`` is the command line tool which interacts with the Keystone
 service to initialize and update data within Keystone. Generally,
-``keystone-manage`` is only used for operations that cannot be accomplished
+``sidserver-manage`` is only used for operations that cannot be accomplished
 with the HTTP API, such data import/export and database migrations.
 
 USAGE
 =====
 
-    ``keystone-manage [options] action [additional args]``
+    ``sidserver-manage [options] action [additional args]``
 
-General keystone-manage options:
+General sidserver-manage options:
 --------------------------------
 
 * ``--help`` : display verbose help output.
 
-Invoking ``keystone-manage`` by itself will give you some usage information.
+Invoking ``sidserver-manage`` by itself will give you some usage information.
 
 Available commands:
 
@@ -119,10 +119,10 @@ None
 SEE ALSO
 ========
 
-* `OpenStack Keystone <http://keystone.openstack.org>`__
+* `OpenStack Keystone <http://sidserver.openstack.org>`__
 
 SOURCE
 ======
 
-* Keystone is sourced in GitHub `Keystone <http://github.com/openstack/keystone>`__
-* Keystone bugs are managed at Launchpad `Keystone <https://bugs.launchpad.net/keystone>`__
+* Keystone is sourced in GitHub `Keystone <http://github.com/openstack/sidserver>`__
+* Keystone bugs are managed at Launchpad `Keystone <https://bugs.launchpad.net/sidserver>`__

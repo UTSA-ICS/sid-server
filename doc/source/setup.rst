@@ -18,13 +18,13 @@
 Setting up a Keystone development environment
 =============================================
 
-This document describes getting the source from keystone's `GitHub repository`_
+This document describes getting the source from sidserver's `GitHub repository`_
 for development purposes.
 
 To install Keystone from packaging, refer instead to Keystone's `User
 Documentation`_.
 
-.. _`GitHub Repository`: http://github.com/openstack/keystone
+.. _`GitHub Repository`: http://github.com/openstack/sidserver
 .. _`User Documentation`: http://docs.openstack.org/
 
 Prerequisites
@@ -58,13 +58,13 @@ Make a clone of the code from our `Github repository`:
 
 .. code-block:: bash
 
-    $ git clone https://github.com/openstack/keystone.git
+    $ git clone https://github.com/openstack/sidserver.git
 
 When that is complete, you can:
 
 .. code-block:: bash
 
-    $ cd keystone
+    $ cd sidserver
 
 Installing dependencies
 =======================
@@ -74,7 +74,7 @@ Keystone maintains two lists of dependencies::
     requirements.txt
     test-requirements.txt
 
-The first is the list of dependencies needed for running keystone, the second list includes dependencies used for active development and testing of Keystone itself.
+The first is the list of dependencies needed for running sidserver, the second list includes dependencies used for active development and testing of Keystone itself.
 
 These dependencies can be installed from PyPi_ using the Python tool pip_.
 
@@ -141,10 +141,10 @@ dependencies directly into your system from the requires files:
 
 .. code-block:: bash
 
-    # Install the dependencies for running keystone
+    # Install the dependencies for running sidserver
     $ pip install -r requirements.txt
 
-    # Install the dependencies for developing, testing, and running keystone
+    # Install the dependencies for developing, testing, and running sidserver
     $ pip install -r test-requirements.txt
 
     # Use 'python setup.py' to link Keystone into Python's site-packages
@@ -163,12 +163,12 @@ forget to activate it:
     $ source .venv/bin/activate
     $ python
 
-You should then be able to `import keystone` from your Python shell
+You should then be able to `import sidserver` from your Python shell
 without issue:
 
 .. code-block:: python
 
-    >>> import keystone
+    >>> import sidserver
     >>>
 
 If you can import Keystone successfully, you should be ready to move on to

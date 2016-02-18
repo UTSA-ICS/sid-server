@@ -1,5 +1,5 @@
 ============
-keystone-all
+sidserver-all
 ============
 
 ------------------------
@@ -18,7 +18,7 @@ SYNOPSIS
 
 ::
 
-  keystone-all [-h] [--config-dir DIR] [--config-file PATH] [--debug]
+  sidserver-all [-h] [--config-dir DIR] [--config-file PATH] [--debug]
                     [--log-config-append PATH] [--log-date-format DATE_FORMAT]
                     [--log-dir LOG_DIR] [--log-file PATH]
                     [--log-format FORMAT] [--nodebug] [--nostandard-threads]
@@ -31,7 +31,7 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-keystone-all starts both the service and administrative APIs in a single
+sidserver-all starts both the service and administrative APIs in a single
 process to provide catalog, authorization, and authentication services for
 OpenStack.
 
@@ -103,10 +103,10 @@ None
 SEE ALSO
 ========
 
-* `OpenStack Keystone <http://keystone.openstack.org>`__
+* `OpenStack Keystone <http://sidserver.openstack.org>`__
 
 SOURCE
 ======
 
-* Keystone source is managed in GitHub `Keystone <http://github.com/openstack/keystone>`__
-* Keystone bugs are managed at Launchpad `Keystone <https://bugs.launchpad.net/keystone>`__
+* Keystone source is managed in GitHub `Keystone <http://github.com/openstack/sidserver>`__
+* Keystone bugs are managed at Launchpad `Keystone <https://bugs.launchpad.net/sidserver>`__

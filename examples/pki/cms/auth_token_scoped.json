@@ -51,7 +51,7 @@
                 ],
                 "endpoints_links": [],
                 "type": "identity",
-                "name": "keystone"
+                "name": "sidserver"
             }
         ],
         "token": {

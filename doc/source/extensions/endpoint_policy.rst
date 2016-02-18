@@ -18,13 +18,13 @@ Enabling the Endpoint Policy Extension
 To enable the endpoint policy extension:
 
 1. Optionally, add the endpoint policy extension driver to the
-   ``[endpoint_policy]`` section in ``keystone.conf``. For example::
+   ``[endpoint_policy]`` section in ``sidserver.conf``. For example::
 
     [endpoint_policy]
-    driver = keystone.contrib.endpoint_policy.backends.sql.EndpointPolicy
+    driver = sidserver.contrib.endpoint_policy.backends.sql.EndpointPolicy
 
 2. Add the ``endpoint_policy_extension`` policy to the ``api_v3`` pipeline in
-   ``keystone-paste.ini``. This must be added after ``json_body`` and before
+   ``sidserver-paste.ini``. This must be added after ``json_body`` and before
    the last entry in the pipeline. For example::
 
     [pipeline:api_v3]
@@ -32,4 +32,4 @@ To enable the endpoint policy extension:
 
 3. Create the endpoint policy extension tables if using the provided SQL backend. For example::
 
-    ./bin/keystone-manage db_sync --extension endpoint_policy
+    ./bin/sidserver-manage db_sync --extension endpoint_policy

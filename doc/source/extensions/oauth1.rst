@@ -20,19 +20,19 @@ Enabling the OAuth1 Extension
 
 To enable the OAuth1 extension:
 
-1. Optionally, add the oauth1 extension driver to the ``[oauth1]`` section in ``keystone.conf``. For example::
+1. Optionally, add the oauth1 extension driver to the ``[oauth1]`` section in ``sidserver.conf``. For example::
 
     [oauth1]
-    driver = keystone.contrib.oauth1.backends.sql.OAuth1
+    driver = sidserver.contrib.oauth1.backends.sql.OAuth1
 
-2. Add the ``oauth1`` authentication method to the ``[auth]`` section in ``keystone.conf``::
+2. Add the ``oauth1`` authentication method to the ``[auth]`` section in ``sidserver.conf``::
 
     [auth]
     methods = external,password,token,oauth1
-    oauth1 = keystone.auth.plugins.oauth1.OAuth
+    oauth1 = sidserver.auth.plugins.oauth1.OAuth
 
 3. Add the ``oauth1_extension`` filter to the ``api_v3`` pipeline in
-   ``keystone-paste.ini``. This must be added after ``json_body`` and before
+   ``sidserver-paste.ini``. This must be added after ``json_body`` and before
    the last entry in the pipeline. For example::
 
     [pipeline:api_v3]
@@ -40,7 +40,7 @@ To enable the OAuth1 extension:
 
 4. Create the OAuth1 extension tables if using the provided SQL backend. For example::
 
-    ./bin/keystone-manage db_sync --extension oauth1
+    ./bin/sidserver-manage db_sync --extension oauth1
 
 5. Optionally, if deploying under an HTTPD server (i.e. Apache), set the
    `WSGIPassAuthorization` to allow the OAuth Authorization headers to

@@ -32,7 +32,7 @@ To install `mod_auth_openidc` on Ubuntu, perform the following:
 
 Note that this module is not available on Fedora/CentOS/Red Hat.
 
-In the keystone Apache site file, add the following as a top level option, to
+In the sidserver Apache site file, add the following as a top level option, to
 load the `mod_auth_openidc` module:
 
 .. code-block:: xml
@@ -88,6 +88,6 @@ Tips
    with `HTTP_`, so for instance, if you set OIDCClaimPrefix to `OIDC-`, then a
    typical remote value to check for is: `HTTP_OIDC_ISS`.
 
-2. Don't forget to add oidc as an [auth] plugin in keystone.conf, see `Step 2`_
+2. Don't forget to add oidc as an [auth] plugin in sidserver.conf, see `Step 2`_
 
 .. _`Step 2`: federation.html

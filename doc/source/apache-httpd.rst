@@ -31,24 +31,24 @@ Running Keystone in HTTPD
 Files
 -----
 
-Copy the file httpd/wsgi-keystone.conf to the appropriate location for your
+Copy the file httpd/wsgi-sidserver.conf to the appropriate location for your
 Apache server, most likely::
 
-    /etc/httpd/conf.d/wsgi-keystone.conf
+    /etc/httpd/conf.d/wsgi-sidserver.conf
 
 Update this file to match your system configuration (for example, some
 distributions put httpd logs in the ``apache2`` directory and some in the
 ``httpd`` directory; also, enable TLS).
 
-Create the directory ``/var/www/cgi-bin/keystone/``. You can either hardlink or
-softlink the files ``main`` and ``admin`` to the file ``keystone.py`` in this
+Create the directory ``/var/www/cgi-bin/sidserver/``. You can either hardlink or
+softlink the files ``main`` and ``admin`` to the file ``sidserver.py`` in this
 directory. For a distribution appropriate place, it should probably be copied
 to::
 
-    /usr/share/openstack/keystone/httpd/keystone.py
+    /usr/share/openstack/sidserver/httpd/sidserver.py
 
-Keystone's primary configuration file (``etc/keystone.conf``) and the
-PasteDeploy configuration file (``etc/keystone-paste.ini``) must be readable to
+Keystone's primary configuration file (``etc/sidserver.conf``) and the
+PasteDeploy configuration file (``etc/sidserver-paste.ini``) must be readable to
 HTTPD in one of the default locations described in :doc:`configuration`.
 
 SELinux
@@ -69,25 +69,25 @@ Keystone Configuration
 
 Make sure that when using a token format that requires persistence, you use a
 token persistence driver that can be shared between processes. The SQL and
-memcached token persistence drivers provided with keystone can be shared
+memcached token persistence drivers provided with sidserver can be shared
 between processes.
 
 .. WARNING::
 
-    The KVS (``keystone.token.persistence.backends.kvs.Token``) token
+    The KVS (``sidserver.token.persistence.backends.kvs.Token``) token
     persistence driver cannot be shared between processes so must not be used
-    when running keystone under HTTPD (the tokens will not be shared between
+    when running sidserver under HTTPD (the tokens will not be shared between
     the processes of the server and validation will fail).
 
-For SQL, in ``/etc/keystone/keystone.conf`` set::
+For SQL, in ``/etc/sidserver/sidserver.conf`` set::
 
     [token]
-    driver = keystone.token.persistence.backends.sql.Token
+    driver = sidserver.token.persistence.backends.sql.Token
 
-For memcached, in ``/etc/keystone/keystone.conf`` set::
+For memcached, in ``/etc/sidserver/sidserver.conf`` set::
 
     [token]
-    driver = keystone.token.persistence.backends.memcache.Token
+    driver = sidserver.token.persistence.backends.memcache.Token
 
 All servers that are storing tokens need a shared backend. This means that
 either all servers use the same database server or use a common memcached pool.

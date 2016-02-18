@@ -28,12 +28,12 @@ To configure the plugin that should be used set the ``external`` option again
 in the ``auth`` section. There are two external authentication method plugins
 provided by Keystone:
 
-* ``keystone.auth.plugins.external.Default``: This plugin won't take into
+* ``sidserver.auth.plugins.external.Default``: This plugin won't take into
   account the domain information that the external authentication method may
   pass down to Keystone and will always use the configured default domain. The
   ``REMOTE_USER`` variable is the username.
 
-* ``keystone.auth.plugins.external.Domain``: This plugin expects that the
+* ``sidserver.auth.plugins.external.Domain``: This plugin expects that the
   ``REMOTE_DOMAIN`` variable contains the domain for the user. If this variable
   is not present, the configured default domain will be used. The
   ``REMOTE_USER`` variable is the username.
@@ -99,8 +99,8 @@ following the semantics below:
 
 .. code-block:: python
 
-    from keystone.common import wsgi
-    from keystone import exception
+    from sidserver.common import wsgi
+    from sidserver import exception
 
     class MyMiddlewareAuth(wsgi.Middleware):
         def __init__(self, *args, **kwargs):
@@ -130,11 +130,11 @@ Pipeline configuration
 Once you have your WSGI middleware component developed you have to add it to
 your pipeline. The first step is to add the middleware to your configuration
 file. Assuming that your middleware module is
-``keystone.middleware.MyMiddlewareAuth``, you can configure it in your
-``keystone-paste.ini`` as::
+``sidserver.middleware.MyMiddlewareAuth``, you can configure it in your
+``sidserver-paste.ini`` as::
 
     [filter:my_auth]
-    paste.filter_factory = keystone.middleware.MyMiddlewareAuth.factory
+    paste.filter_factory = sidserver.middleware.MyMiddlewareAuth.factory
 
 The second step is to add your middleware to the pipeline. The exact place
 where you should place it will depend on your code (i.e. if you need for

@@ -16,12 +16,12 @@
 
 # Sample initial data for Keystone using python-keystoneclient
 #
-# This script is based on the original DevStack keystone_data.sh script.
+# This script is based on the original DevStack sidserver_data.sh script.
 #
 # It demonstrates how to bootstrap Keystone with an administrative user
 # using the OS_SERVICE_TOKEN and OS_SERVICE_ENDPOINT environment variables
 # and the administrative API.  It will get the admin_token (OS_SERVICE_TOKEN)
-# and admin_port from keystone.conf if available.
+# and admin_port from sidserver.conf if available.
 #
 # Disable creation of endpoints by setting DISABLE_ENDPOINTS environment variable.
 # Use this with the Catalog Templated backend.
@@ -53,12 +53,12 @@ CONTROLLER_ADMIN_ADDRESS=${CONTROLLER_ADMIN_ADDRESS:-localhost}
 CONTROLLER_INTERNAL_ADDRESS=${CONTROLLER_INTERNAL_ADDRESS:-localhost}
 
 TOOLS_DIR=$(cd $(dirname "$0") && pwd)
-KEYSTONE_CONF=${KEYSTONE_CONF:-/etc/keystone/keystone.conf}
+KEYSTONE_CONF=${KEYSTONE_CONF:-/etc/sidserver/sidserver.conf}
 if [[ -r "$KEYSTONE_CONF" ]]; then
     EC2RC="$(dirname "$KEYSTONE_CONF")/ec2rc"
-elif [[ -r "$TOOLS_DIR/../etc/keystone.conf" ]]; then
+elif [[ -r "$TOOLS_DIR/../etc/sidserver.conf" ]]; then
     # assume git checkout
-    KEYSTONE_CONF="$TOOLS_DIR/../etc/keystone.conf"
+    KEYSTONE_CONF="$TOOLS_DIR/../etc/sidserver.conf"
     EC2RC="$TOOLS_DIR/../etc/ec2rc"
 else
     KEYSTONE_CONF=""
@@ -82,7 +82,7 @@ fi
 export OS_SERVICE_TOKEN=${OS_SERVICE_TOKEN:-$CONFIG_SERVICE_TOKEN}
 if [[ -z "$OS_SERVICE_TOKEN" ]]; then
     echo "No service token found."
-    echo "Set OS_SERVICE_TOKEN manually from keystone.conf admin_token."
+    echo "Set OS_SERVICE_TOKEN manually from sidserver.conf admin_token."
     exit 1
 fi
 
@@ -95,52 +95,52 @@ function get_id () {
 #
 # Default tenant
 #
-DEMO_TENANT=$(get_id keystone tenant-create --name=demo \
+DEMO_TENANT=$(get_id sidserver tenant-create --name=demo \
                                             --description "Default Tenant")
 
-ADMIN_USER=$(get_id keystone user-create --name=admin \
+ADMIN_USER=$(get_id sidserver user-create --name=admin \
                                          --pass="${ADMIN_PASSWORD}")
 
-ADMIN_ROLE=$(get_id keystone role-create --name=admin)
+ADMIN_ROLE=$(get_id sidserver role-create --name=admin)
 
-keystone user-role-add --user-id $ADMIN_USER \
+sidserver user-role-add --user-id $ADMIN_USER \
                        --role-id $ADMIN_ROLE \
                        --tenant-id $DEMO_TENANT
 
 #
 # Service tenant
 #
-SERVICE_TENANT=$(get_id keystone tenant-create --name=service \
+SERVICE_TENANT=$(get_id sidserver tenant-create --name=service \
                                                --description "Service Tenant")
 
-GLANCE_USER=$(get_id keystone user-create --name=glance \
+GLANCE_USER=$(get_id sidserver user-create --name=glance \
                                           --pass="${GLANCE_PASSWORD}")
 
-keystone user-role-add --user-id $GLANCE_USER \
+sidserver user-role-add --user-id $GLANCE_USER \
                        --role-id $ADMIN_ROLE \
                        --tenant-id $SERVICE_TENANT
 
-NOVA_USER=$(get_id keystone user-create --name=nova \
+NOVA_USER=$(get_id sidserver user-create --name=nova \
                                         --pass="${NOVA_PASSWORD}" \
                                         --tenant-id $SERVICE_TENANT)
 
-keystone user-role-add --user-id $NOVA_USER \
+sidserver user-role-add --user-id $NOVA_USER \
                        --role-id $ADMIN_ROLE \
                        --tenant-id $SERVICE_TENANT
 
-EC2_USER=$(get_id keystone user-create --name=ec2 \
+EC2_USER=$(get_id sidserver user-create --name=ec2 \
                                        --pass="${EC2_PASSWORD}" \
                                        --tenant-id $SERVICE_TENANT)
 
-keystone user-role-add --user-id $EC2_USER \
+sidserver user-role-add --user-id $EC2_USER \
                        --role-id $ADMIN_ROLE \
                        --tenant-id $SERVICE_TENANT
 
-SWIFT_USER=$(get_id keystone user-create --name=swift \
+SWIFT_USER=$(get_id sidserver user-create --name=swift \
                                          --pass="${SWIFT_PASSWORD}" \
                                          --tenant-id $SERVICE_TENANT)
 
-keystone user-role-add --user-id $SWIFT_USER \
+sidserver user-role-add --user-id $SWIFT_USER \
                        --role-id $ADMIN_ROLE \
                        --tenant-id $SERVICE_TENANT
 
@@ -148,11 +148,11 @@ keystone user-role-add --user-id $SWIFT_USER \
 # Keystone service
 #
 KEYSTONE_SERVICE=$(get_id \
-keystone service-create --name=keystone \
+sidserver service-create --name=sidserver \
                         --type=identity \
                         --description="Keystone Identity Service")
 if [[ -z "$DISABLE_ENDPOINTS" ]]; then
-    keystone endpoint-create --region RegionOne --service-id $KEYSTONE_SERVICE \
+    sidserver endpoint-create --region RegionOne --service-id $KEYSTONE_SERVICE \
         --publicurl "http://$CONTROLLER_PUBLIC_ADDRESS:\$(public_port)s/v2.0" \
         --adminurl "http://$CONTROLLER_ADMIN_ADDRESS:\$(admin_port)s/v2.0" \
         --internalurl "http://$CONTROLLER_INTERNAL_ADDRESS:\$(public_port)s/v2.0"
@@ -162,11 +162,11 @@ fi
 # Nova service
 #
 NOVA_SERVICE=$(get_id \
-keystone service-create --name=nova \
+sidserver service-create --name=nova \
                         --type=compute \
                         --description="Nova Compute Service")
 if [[ -z "$DISABLE_ENDPOINTS" ]]; then
-    keystone endpoint-create --region RegionOne --service-id $NOVA_SERVICE \
+    sidserver endpoint-create --region RegionOne --service-id $NOVA_SERVICE \
         --publicurl "http://$CONTROLLER_PUBLIC_ADDRESS:8774/v2/\$(tenant_id)s" \
         --adminurl "http://$CONTROLLER_ADMIN_ADDRESS:8774/v2/\$(tenant_id)s" \
         --internalurl "http://$CONTROLLER_INTERNAL_ADDRESS:8774/v2/\$(tenant_id)s"
@@ -176,11 +176,11 @@ fi
 # Volume service
 #
 VOLUME_SERVICE=$(get_id \
-keystone service-create --name=volume \
+sidserver service-create --name=volume \
                         --type=volume \
                         --description="Nova Volume Service")
 if [[ -z "$DISABLE_ENDPOINTS" ]]; then
-    keystone endpoint-create --region RegionOne --service-id $VOLUME_SERVICE \
+    sidserver endpoint-create --region RegionOne --service-id $VOLUME_SERVICE \
         --publicurl "http://$CONTROLLER_PUBLIC_ADDRESS:8776/v1/\$(tenant_id)s" \
         --adminurl "http://$CONTROLLER_ADMIN_ADDRESS:8776/v1/\$(tenant_id)s" \
         --internalurl "http://$CONTROLLER_INTERNAL_ADDRESS:8776/v1/\$(tenant_id)s"
@@ -190,11 +190,11 @@ fi
 # Image service
 #
 GLANCE_SERVICE=$(get_id \
-keystone service-create --name=glance \
+sidserver service-create --name=glance \
                         --type=image \
                         --description="Glance Image Service")
 if [[ -z "$DISABLE_ENDPOINTS" ]]; then
-    keystone endpoint-create --region RegionOne --service-id $GLANCE_SERVICE \
+    sidserver endpoint-create --region RegionOne --service-id $GLANCE_SERVICE \
         --publicurl "http://$CONTROLLER_PUBLIC_ADDRESS:9292" \
         --adminurl "http://$CONTROLLER_ADMIN_ADDRESS:9292" \
         --internalurl "http://$CONTROLLER_INTERNAL_ADDRESS:9292"
@@ -204,11 +204,11 @@ fi
 # EC2 service
 #
 EC2_SERVICE=$(get_id \
-keystone service-create --name=ec2 \
+sidserver service-create --name=ec2 \
                         --type=ec2 \
                         --description="EC2 Compatibility Layer")
 if [[ -z "$DISABLE_ENDPOINTS" ]]; then
-    keystone endpoint-create --region RegionOne --service-id $EC2_SERVICE \
+    sidserver endpoint-create --region RegionOne --service-id $EC2_SERVICE \
         --publicurl "http://$CONTROLLER_PUBLIC_ADDRESS:8773/services/Cloud" \
         --adminurl "http://$CONTROLLER_ADMIN_ADDRESS:8773/services/Admin" \
         --internalurl "http://$CONTROLLER_INTERNAL_ADDRESS:8773/services/Cloud"
@@ -218,18 +218,18 @@ fi
 # Swift service
 #
 SWIFT_SERVICE=$(get_id \
-keystone service-create --name=swift \
+sidserver service-create --name=swift \
                         --type="object-store" \
                         --description="Swift Service")
 if [[ -z "$DISABLE_ENDPOINTS" ]]; then
-    keystone endpoint-create --region RegionOne --service-id $SWIFT_SERVICE \
+    sidserver endpoint-create --region RegionOne --service-id $SWIFT_SERVICE \
         --publicurl   "http://$CONTROLLER_PUBLIC_ADDRESS:8080/v1/AUTH_\$(tenant_id)s" \
         --adminurl    "http://$CONTROLLER_ADMIN_ADDRESS:8080/v1" \
         --internalurl "http://$CONTROLLER_INTERNAL_ADDRESS:8080/v1/AUTH_\$(tenant_id)s"
 fi
 
 # create ec2 creds and parse the secret and access key returned
-RESULT=$(keystone ec2-credentials-create --tenant-id=$SERVICE_TENANT --user-id=$ADMIN_USER)
+RESULT=$(sidserver ec2-credentials-create --tenant-id=$SERVICE_TENANT --user-id=$ADMIN_USER)
 ADMIN_ACCESS=`echo "$RESULT" | grep access | awk '{print $4}'`
 ADMIN_SECRET=`echo "$RESULT" | grep secret | awk '{print $4}'`
 

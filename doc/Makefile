@@ -45,7 +45,7 @@ clean:
 	-rm -rf $(BUILDDIR)/*
 
 autodoc:
-	$(SPHINXAPIDOC) -f -o $(SOURCEDIR) ../keystone
+	$(SPHINXAPIDOC) -f -o $(SOURCEDIR) ../sidserver
 
 html: autodoc
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
@@ -83,17 +83,17 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/keystone.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/sidserver.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/keystone.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/sidserver.qhc"
 
 devhelp:
 	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/keystone"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/keystone"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/sidserver"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/sidserver"
 	@echo "# devhelp"
 
 epub:

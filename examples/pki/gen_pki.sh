@@ -56,7 +56,7 @@ stateOrProvinceName     = CA
 localityName            = Sunnyvale
 organizationName        = OpenStack
 organizationalUnitName  = Keystone
-emailAddress            = keystone@openstack.org
+emailAddress            = sidserver@openstack.org
 commonName              = Self Signed
 
 [ ca_extensions ]
@@ -68,7 +68,7 @@ function generate_ssl_req_conf {
     echo '
 [ req ]
 default_bits            = 2048
-default_keyfile         = keystonekey.pem
+default_keyfile         = sidserverkey.pem
 default_md              = default
 
 prompt                  = no
@@ -81,7 +81,7 @@ localityName            = Sunnyvale
 organizationName        = OpenStack
 organizationalUnitName  = Keystone
 commonName              = localhost
-emailAddress            = keystone@openstack.org
+emailAddress            = sidserver@openstack.org
 ' > ssl_req.conf
 }
 
@@ -89,7 +89,7 @@ function generate_cms_signing_req_conf {
     echo '
 [ req ]
 default_bits            = 2048
-default_keyfile         = keystonekey.pem
+default_keyfile         = sidserverkey.pem
 default_md              = default
 
 prompt                  = no
@@ -102,7 +102,7 @@ localityName            = Sunnyvale
 organizationName        = OpenStack
 organizationalUnitName  = Keystone
 commonName              = Keystone
-emailAddress            = keystone@openstack.org
+emailAddress            = sidserver@openstack.org
 ' > cms_signing_req.conf
 }
 

@@ -98,50 +98,50 @@ of pipelines of WSGI middleware, such as:
     pipeline = sizelimit url_normalize build_auth_context token_auth admin_token_auth
     json_body ec2_extension_v3 s3_extension service_v3
 
-These in turn use a subclass of :mod:`keystone.common.wsgi.ComposingRouter` to
+These in turn use a subclass of :mod:`sidserver.common.wsgi.ComposingRouter` to
 link URLs to Controllers (a subclass of
-:mod:`keystone.common.wsgi.Application`). Within each Controller, one or more
-Managers are loaded (for example, see :mod:`keystone.catalog.core.Manager`),
+:mod:`sidserver.common.wsgi.Application`). Within each Controller, one or more
+Managers are loaded (for example, see :mod:`sidserver.catalog.core.Manager`),
 which are thin wrapper classes which load the appropriate service driver based
 on the Keystone configuration.
 
 * Assignment
 
- * :mod:`keystone.assignment.controllers.GrantAssignmentV3`
- * :mod:`keystone.assignment.controllers.ProjectAssignmentV3`
- * :mod:`keystone.assignment.controllers.TenantAssignment`
- * :mod:`keystone.assignment.controllers.Role`
- * :mod:`keystone.assignment.controllers.RoleAssignmentV2`
- * :mod:`keystone.assignment.controllers.RoleAssignmentV3`
- * :mod:`keystone.assignment.controllers.RoleV3`
+ * :mod:`sidserver.assignment.controllers.GrantAssignmentV3`
+ * :mod:`sidserver.assignment.controllers.ProjectAssignmentV3`
+ * :mod:`sidserver.assignment.controllers.TenantAssignment`
+ * :mod:`sidserver.assignment.controllers.Role`
+ * :mod:`sidserver.assignment.controllers.RoleAssignmentV2`
+ * :mod:`sidserver.assignment.controllers.RoleAssignmentV3`
+ * :mod:`sidserver.assignment.controllers.RoleV3`
 
 * Authentication
 
- * :mod:`keystone.auth.controllers.Auth`
+ * :mod:`sidserver.auth.controllers.Auth`
 
 * Catalog
 
- * :mod:`keystone.catalog.controllers.EndpointV3`
- * :mod:`keystone.catalog.controllers.RegionV3`
- * :mod:`keystone.catalog.controllers.ServiceV3`
+ * :mod:`sidserver.catalog.controllers.EndpointV3`
+ * :mod:`sidserver.catalog.controllers.RegionV3`
+ * :mod:`sidserver.catalog.controllers.ServiceV3`
 
 * Identity
 
- * :mod:`keystone.identity.controllers.GroupV3`
- * :mod:`keystone.identity.controllers.UserV3`
+ * :mod:`sidserver.identity.controllers.GroupV3`
+ * :mod:`sidserver.identity.controllers.UserV3`
 
 * Policy
 
- * :mod:`keystone.policy.controllers.PolicyV3`
+ * :mod:`sidserver.policy.controllers.PolicyV3`
 
 * Resource
 
- * :mod:`keystone.resource.controllers.DomainV3`
- * :mod:`keystone.resource.controllers.ProjectV3`
+ * :mod:`sidserver.resource.controllers.DomainV3`
+ * :mod:`sidserver.resource.controllers.ProjectV3`
 
 * Token
 
- * :mod:`keystone.token.controllers.Auth`
+ * :mod:`sidserver.token.controllers.Auth`
 
 
 .. _Paste: http://pythonpaste.org/
@@ -153,20 +153,20 @@ Service Backends
 
 Each of the services can be configured to use a backend to allow Keystone to fit a
 variety of environments and needs. The backend for each service is defined in
-the keystone.conf file with the key ``driver`` under a group associated with
+the sidserver.conf file with the key ``driver`` under a group associated with
 each service.
 
 A general class under each backend named ``Driver`` exists to provide an
 abstract base class for any implementations, identifying the expected service
 implementations. The drivers for the services are:
 
-* :mod:`keystone.assignment.core.Driver`
-* :mod:`keystone.assignment.core.RoleDriver`
-* :mod:`keystone.catalog.core.Driver`
-* :mod:`keystone.identity.core.Driver`
-* :mod:`keystone.policy.core.Driver`
-* :mod:`keystone.resource.core.Driver`
-* :mod:`keystone.token.core.Driver`
+* :mod:`sidserver.assignment.core.Driver`
+* :mod:`sidserver.assignment.core.RoleDriver`
+* :mod:`sidserver.catalog.core.Driver`
+* :mod:`sidserver.identity.core.Driver`
+* :mod:`sidserver.policy.core.Driver`
+* :mod:`sidserver.resource.core.Driver`
+* :mod:`sidserver.token.core.Driver`
 
 If you implement a backend driver for one of the Keystone services, you're
 expected to subclass from these classes.
@@ -176,7 +176,7 @@ SQL Backend
 -----------
 
 A SQL based backend using SQLAlchemy to store data persistently. The
-``keystone-manage`` command introspects the backends to identify SQL based backends
+``sidserver-manage`` command introspects the backends to identify SQL based backends
 when running "db_sync" to establish or upgrade schema. If the backend driver
 has a method db_sync(), it will be invoked to sync and/or migrate schema.
 
@@ -240,7 +240,7 @@ variety of CRUD operations are provided for the sake of development and testing.
 CRUD is treated as an extension or additional feature to the core feature set
 in that it is not required that a backend support it. It is expected that
 backends for services that don't support the CRUD operations will raise a
-:mod:`keystone.exception.NotImplemented`.
+:mod:`sidserver.exception.NotImplemented`.
 
 
 ----------------------------------
@@ -259,7 +259,7 @@ being checked for:
 Other systems wishing to use the policy engine will require additional styles
 of checks and will possibly write completely custom backends. By default,
 Keystone leverages Policy enforcement that is maintained in Oslo-Incubator,
-found in `keystone/openstack/common/policy.py`.
+found in `sidserver/openstack/common/policy.py`.
 
 
 Rules

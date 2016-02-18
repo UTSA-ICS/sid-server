@@ -45,7 +45,7 @@ Admin Token
 -----------
 
 For a default installation of Keystone, before you can use the REST API, you
-need to define an authorization token. This is configured in ``keystone.conf``
+need to define an authorization token. This is configured in ``sidserver.conf``
 file under the section ``[DEFAULT]``. In the sample file provided with the
 Keystone project, the line defining this token is::
 
@@ -55,7 +55,7 @@ Keystone project, the line defining this token is::
 A "shared secret" that can be used to bootstrap Keystone. This token does not
 represent a user, and carries no explicit authorization.
 To disable in production (highly recommended), remove AdminTokenAuthMiddleware
-from your paste application pipelines (for example, in keystone-paste.ini)
+from your paste application pipelines (for example, in sidserver-paste.ini)
 
 Setting up projects, users, and roles
 -------------------------------------
@@ -144,7 +144,7 @@ Keystone is online, you need to add the services to the catalog:
                                    --description "EC2 Compatibility Layer"
     $ openstack service create image --name glance \
                                       --description "Glance Image Service"
-    $ openstack service create identity --name keystone \
+    $ openstack service create identity --name sidserver \
                                         --description "Keystone Identity Service"
     $ openstack service create object-store --name swift \
                                      --description "Swift Service"

@@ -35,9 +35,9 @@ Configure your Keystone virtual host and adjust the config to properly handle SA
 
 Add *WSGIScriptAlias* directive to your vhost configuration::
 
-    WSGIScriptAliasMatch ^(/v3/OS-FEDERATION/identity_providers/.*?/protocols/.*?/auth)$ /var/www/keystone/main/$1
+    WSGIScriptAliasMatch ^(/v3/OS-FEDERATION/identity_providers/.*?/protocols/.*?/auth)$ /var/www/sidserver/main/$1
 
-Make sure the *wsgi-keystone.conf* contains a *<Location>* directive for the Shibboleth module and
+Make sure the *wsgi-sidserver.conf* contains a *<Location>* directive for the Shibboleth module and
 a *<Location>* directive for each identity provider::
 
     <Location /Shibboleth.sso>
@@ -70,7 +70,7 @@ Enable the Keystone virtual host, for example:
 
 .. code-block:: bash
 
-    $ a2ensite wsgi-keystone.conf
+    $ a2ensite wsgi-sidserver.conf
 
 Enable the ``ssl`` and ``shib2`` modules, for example:
 

@@ -34,7 +34,7 @@ def run_apidoc(app):
         return
     run_already = True
 
-    package_dir = path.abspath(path.join(app.srcdir, '..', '..', 'keystone'))
+    package_dir = path.abspath(path.join(app.srcdir, '..', '..', 'sidserver'))
     source_dir = path.join(app.srcdir, 'api')
     apidoc.main(['apidoc', package_dir, '-f',
                  '-H', 'Keystone Modules',

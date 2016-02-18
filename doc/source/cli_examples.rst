@@ -61,7 +61,7 @@ example:
 
 .. code-block:: bash
 
-    $ keystone tenant-create --name=demo
+    $ sidserver tenant-create --name=demo
 
 creates a tenant named "demo".
 
@@ -76,7 +76,7 @@ example:
 
 .. code-block:: bash
 
-    $ keystone tenant-delete f2b7b39c860840dfa47d9ee4adffa0b3
+    $ sidserver tenant-delete f2b7b39c860840dfa47d9ee4adffa0b3
 
 -----
 Users
@@ -97,7 +97,7 @@ example:
 
 .. code-block:: bash
 
-    $ keystone user-create
+    $ sidserver user-create
     --name=admin \
     --pass=secrete \
     --tenant_id=2395953419144b67955ac4bab96b8fd2 \
@@ -114,7 +114,7 @@ example:
 
 .. code-block:: bash
 
-    $ keystone user-delete f2b7b39c860840dfa47d9ee4adffa0b3
+    $ sidserver user-delete f2b7b39c860840dfa47d9ee4adffa0b3
 
 ``user-list``
 -------------
@@ -129,7 +129,7 @@ example:
 
 .. code-block:: bash
 
-    $ keystone user-list
+    $ sidserver user-list
 
 ``user-update``
 ---------------------
@@ -149,7 +149,7 @@ example:
 
 .. code-block:: bash
 
-    $ keystone user-update 03c84b51574841ba9a0d8db7882ac645 --email=newemail@example.com
+    $ sidserver user-update 03c84b51574841ba9a0d8db7882ac645 --email=newemail@example.com
 
 ``user-password-update``
 ------------------------
@@ -163,7 +163,7 @@ example:
 
 .. code-block:: bash
 
-    $ keystone user-password-update --pass foo 03c84b51574841ba9a0d8db7882ac645
+    $ sidserver user-password-update --pass foo 03c84b51574841ba9a0d8db7882ac645
 
 -----
 Roles
@@ -180,7 +180,7 @@ example:
 
 .. code-block:: bash
 
-    $ keystone role-create --name=demo
+    $ sidserver role-create --name=demo
 
 ``role-delete``
 ---------------
@@ -193,7 +193,7 @@ example:
 
 .. code-block:: bash
 
-    $ keystone role-delete 19d1d3344873464d819c45f521ff9890
+    $ sidserver role-delete 19d1d3344873464d819c45f521ff9890
 
 ``role-list``
 -------------
@@ -202,7 +202,7 @@ example:
 
 .. code-block:: bash
 
-    $ keystone role-list
+    $ sidserver role-list
 
 ``role-get``
 ------------
@@ -215,7 +215,7 @@ example:
 
 .. code-block:: bash
 
-    $ keystone role-get 19d1d3344873464d819c45f521ff9890
+    $ sidserver role-get 19d1d3344873464d819c45f521ff9890
 
 
 ``user-role-add``
@@ -231,7 +231,7 @@ example:
 
 .. code-block:: bash
 
-    $ keystone user-role-add  \
+    $ sidserver user-role-add  \
       --user=96a6ebba0d4c441887aceaeced892585  \
       --role=f8dd5a2e4dc64a41b96add562d9a764e  \
       --tenant_id=2395953419144b67955ac4bab96b8fd2
@@ -249,7 +249,7 @@ example:
 
 .. code-block:: bash
 
-    $ keystone user-role-remove  \
+    $ sidserver user-role-remove  \
       --user=96a6ebba0d4c441887aceaeced892585  \
       --role=f8dd5a2e4dc64a41b96add562d9a764e  \
       --tenant_id=2395953419144b67955ac4bab96b8fd2
@@ -271,7 +271,7 @@ example:
 
 .. code-block:: bash
 
-    $ keystone service-create \
+    $ sidserver service-create \
     --name=nova \
     --type=compute \
     --description="Nova Compute Service"
@@ -287,7 +287,7 @@ example:
 
 .. code-block:: bash
 
-    $ keystone service-list
+    $ sidserver service-list
 
 ``service-get``
 ---------------
@@ -300,7 +300,7 @@ example:
 
 .. code-block:: bash
 
-    $ keystone service-get 08741d8ed88242ca88d1f61484a0fe3b
+    $ sidserver service-get 08741d8ed88242ca88d1f61484a0fe3b
 
 ``service-delete``
 ------------------
@@ -313,4 +313,4 @@ example:
 
 .. code-block:: bash
 
-    $ keystone service-delete 08741d8ed88242ca88d1f61484a0fe3b
+    $ sidserver service-delete 08741d8ed88242ca88d1f61484a0fe3b

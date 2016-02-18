@@ -21,18 +21,18 @@ Enabling the Federation Extension
 To enable the federation extension:
 
 1. Add the federation extension driver to the ``[federation]`` section in
-   ``keystone.conf``. For example::
+   ``sidserver.conf``. For example::
 
        [federation]
-       driver = keystone.contrib.federation.backends.sql.Federation
+       driver = sidserver.contrib.federation.backends.sql.Federation
 
 2. Add the ``saml2`` and/or ``oidc`` authentication methods to the ``[auth]``
-   section in ``keystone.conf``::
+   section in ``sidserver.conf``::
 
        [auth]
        methods = external,password,token,saml2,oidc
-       saml2 = keystone.auth.plugins.mapped.Mapped
-       oidc = keystone.auth.plugins.mapped.Mapped
+       saml2 = sidserver.auth.plugins.mapped.Mapped
+       oidc = sidserver.auth.plugins.mapped.Mapped
 
 .. NOTE::
     The ``external`` method should be dropped to avoid any interference with
@@ -40,7 +40,7 @@ To enable the federation extension:
     always set, even as an empty value.
 
 3. Add the ``federation_extension`` middleware to the ``api_v3`` pipeline in
-   ``keystone-paste.ini``. This must be added after ``json_body`` and before
+   ``sidserver-paste.ini``. This must be added after ``json_body`` and before
    the last entry in the pipeline. For example::
 
        [pipeline:api_v3]
@@ -49,7 +49,7 @@ To enable the federation extension:
 4. Create the federation extension tables if using the provided SQL backend.
    For example::
 
-       ./bin/keystone-manage db_sync --extension federation
+       ./bin/sidserver-manage db_sync --extension federation
 
 5. As of the Juno release, multiple Keystone deployments can now be federated.
    To do so, the `pysaml2 <https://pypi.python.org/pypi/pysaml2>`_ library is

@@ -21,12 +21,12 @@ Configuring Keystone
 .. toctree::
    :maxdepth: 1
 
-   man/keystone-manage
-   man/keystone-all
+   man/sidserver-manage
+   man/sidserver-all
 
 Once Keystone is installed, it is configured via a primary configuration file
-(``etc/keystone.conf``), a PasteDeploy configuration file
-(``etc/keystone-paste.ini``), possibly a separate logging configuration file,
+(``etc/sidserver.conf``), a PasteDeploy configuration file
+(``etc/sidserver-paste.ini``), possibly a separate logging configuration file,
 and initializing data into Keystone using the command line client.
 
 By default, Keystone starts a service on `IANA-assigned port 35357
@@ -43,16 +43,16 @@ this would be accomplished by:
 
 To make the above change persistent,
 ``net.ipv4.ip_local_reserved_ports = 35357`` should be added to
-``/etc/sysctl.conf`` or to ``/etc/sysctl.d/keystone.conf``.
+``/etc/sysctl.conf`` or to ``/etc/sysctl.d/sidserver.conf``.
 
 Starting and Stopping Keystone under Eventlet
 =============================================
 
 .. WARNING::
 
-    Running keystone under eventlet has been deprecated as of the Kilo release.
+    Running sidserver under eventlet has been deprecated as of the Kilo release.
     Support for utilizing eventlet will be removed as of the M-release. The
-    recommended deployment is to run keystone in a WSGI server
+    recommended deployment is to run sidserver in a WSGI server
     (e.g. ``mod_wsgi`` under ``HTTPD``).
 
 Keystone can be run using either its built-in eventlet server or it can be run
@@ -65,7 +65,7 @@ Start Keystone services using the command:
 
 .. code-block:: bash
 
-    $ keystone-all
+    $ sidserver-all
 
 Invoking this command starts up two ``wsgi.Server`` instances, ``admin`` (the
 administration API) and ``main`` (the primary/public API interface). Both
@@ -75,7 +75,7 @@ services are configured to run in a single process.
 
     The separation into ``admin`` and ``main`` interfaces is an historical
     anomaly. The new V3 API provides the same interface on both the admin and
-    main interfaces (this can be configured in ``keystone-paste.ini``, but the
+    main interfaces (this can be configured in ``sidserver-paste.ini``, but the
     default is to have both the same). The V2.0 API provides a limited public
     API (getting and validating tokens) on ``main``, and an administrative API
     (which can include creating users and such) on the ``admin`` interface.
@@ -93,16 +93,16 @@ Configuration Files
 The Keystone configuration files are an ``ini`` file format based on Paste_, a
 common system used to configure Python WSGI based applications. The PasteDeploy
 configuration entries (WSGI pipeline definitions) can be provided in a separate
-``keystone-paste.ini`` file, while general and driver-specific configuration
-parameters are in the primary configuration file ``keystone.conf``.
+``sidserver-paste.ini`` file, while general and driver-specific configuration
+parameters are in the primary configuration file ``sidserver.conf``.
 
 .. NOTE::
 
-   Since keystone's PasteDeploy configuration file has been separated
-   from the main keystone configuration file, ``keystone.conf``, all
+   Since sidserver's PasteDeploy configuration file has been separated
+   from the main sidserver configuration file, ``sidserver.conf``, all
    local configuration or driver-specific configuration parameters must
-   go in the main keystone configuration file instead of the PasteDeploy
-   configuration file, i.e. configuration in ``keystone-paste.ini``
+   go in the main sidserver configuration file instead of the PasteDeploy
+   configuration file, i.e. configuration in ``sidserver-paste.ini``
    is not supported.
 
 The primary configuration file is organized into the following sections:
@@ -137,14 +137,14 @@ The primary configuration file is organized into the following sections:
 * ``[trust]`` - Trust extension configuration
 
 The Keystone primary configuration file is expected to be named
-``keystone.conf``. When starting Keystone, you can specify a different
+``sidserver.conf``. When starting Keystone, you can specify a different
 configuration file to use with ``--config-file``. If you do **not** specify a
 configuration file, Keystone will look in the following directories for a
 configuration file, in order:
 
-* ``~/.keystone/``
+* ``~/.sidserver/``
 * ``~/``
-* ``/etc/keystone/``
+* ``/etc/sidserver/``
 * ``/etc/``
 
 PasteDeploy configuration file is specified by the ``config_file`` parameter in
@@ -165,13 +165,13 @@ following options:
 
  [identity]
  domain_specific_drivers_enabled = True
- domain_config_dir = /etc/keystone/domains
+ domain_config_dir = /etc/sidserver/domains
 
 Setting ``domain_specific_drivers_enabled`` to ``True`` will enable this
 feature, causing Keystone to look in the ``domain_config_dir`` for config files
 of the form::
 
- keystone.<domain_name>.conf
+ sidserver.<domain_name>.conf
 
 Options given in the domain specific configuration file will override those in
 the primary configuration file for the specified domain only. Domains without a
@@ -179,7 +179,7 @@ specific configuration file will continue to use the options from the primary
 configuration file.
 
 Keystone also supports the ability to store the domain-specific configuration
-options in the keystone SQL database, managed via the Identity API, as opposed
+options in the sidserver SQL database, managed via the Identity API, as opposed
 to using domain-specific configuration files.
 
 .. NOTE::
@@ -188,7 +188,7 @@ to using domain-specific configuration files.
     is new and experimental in Kilo.
 
 This capability (which is disabled by default) is enabled by specifying the
-following options in the main keystone configuration file:
+following options in the main sidserver configuration file:
 
 .. code-block:: ini
 
@@ -202,18 +202,18 @@ configuration options specified via the Identity API will be used.
 
 Unlike the file-based method of specifying domain-specific configurations,
 options specified via the Identity API will become active without needing to
-restart the keystone server. For performance reasons, the current state of
-configuration options for a domain are cached in the keystone server, and in
-multi-process and multi-threaded keystone configurations, the new
+restart the sidserver server. For performance reasons, the current state of
+configuration options for a domain are cached in the sidserver server, and in
+multi-process and multi-threaded sidserver configurations, the new
 configuration options may not become active until the cache has timed out. The
 cache settings for domain config options can be adjusted in the general
-keystone configuration file (option ``cache_time`` in the ``domain-config``
+sidserver configuration file (option ``cache_time`` in the ``domain-config``
 group).
 
 .. NOTE::
 
     It is important to notice that when using either of these methods of
-    specifying domain-specific configuration options, the main keystone
+    specifying domain-specific configuration options, the main sidserver
     configuration file is still maintained. Only those options that relate
     to the Identity driver for users and groups (i.e. specifying whether the
     driver for this domain is SQL or LDAP, and, if LDAP, the options that
@@ -224,12 +224,12 @@ group).
 
 For existing installations that already use file-based domain-specific
 configurations who wish to migrate to the SQL-based approach, the
-``keystone-manage`` command can be used to upload all configuration files to
+``sidserver-manage`` command can be used to upload all configuration files to
 the SQL database:
 
 .. code-block:: bash
 
-    $ keystone-manage domain_config_upload --all
+    $ sidserver-manage domain_config_upload --all
 
 Once uploaded, these domain-configuration options will be visible via the
 Identity API as well as applied to the domain-specific drivers. It is also
@@ -238,7 +238,7 @@ specifying the domain name:
 
 .. code-block:: bash
 
-    $ keystone-manage domain_config_upload --domain-name DOMAINA
+    $ sidserver-manage domain_config_upload --domain-name DOMAINA
 
 .. NOTE::
 
@@ -258,7 +258,7 @@ specifying the domain name:
     When using the file-based domain-specific configuration method, to delete a
     domain that uses a domain specific backend, it's necessary to first disable
     it, remove its specific configuration file (i.e. its corresponding
-    keystone.<domain_name>.conf) and then restart the Identity server. When
+    sidserver.<domain_name>.conf) and then restart the Identity server. When
     managing configuration options via the Identity API, the domain can simply
     be disabled and deleted via the Identity API; since any domain-specific
     configuration options will automatically be removed.
@@ -283,24 +283,24 @@ Keystone.
 
 The use of a hash will ensure that if the public ID needs to be regenerated
 then the same public ID will be created. This is useful if you are running
-multiple keystones and want to ensure the same ID would be generated whichever
+multiple sidservers and want to ensure the same ID would be generated whichever
 server you hit.
 
 While Keystone will dynamically maintain the identity mapping, including
 removing entries when entities are deleted via the Keystone, for those entities
 in backends that are managed outside of Keystone (e.g. a Read Only LDAP),
 Keystone will not know if entities have been deleted and hence will continue to
-carry stale identity mappings in its table. While benign, keystone provides an
+carry stale identity mappings in its table. While benign, sidserver provides an
 ability for operators to purge the mapping table of such stale entries using
-the keystone-manage command, for example:
+the sidserver-manage command, for example:
 
 .. code-block:: bash
 
-    $ keystone-manage mapping_purge --domain-name DOMAINA --local-id abc@de.com
+    $ sidserver-manage mapping_purge --domain-name DOMAINA --local-id abc@de.com
 
 A typical usage would be for an operator to obtain a list of those entries in
 an external backend that had been deleted out-of-band to Keystone, and then
-call keystone-manage to purge those entries by specifying the domain and
+call sidserver-manage to purge those entries by specifying the domain and
 local-id. The type of the entity (i.e. user or group) may also be specified if
 this is needed to uniquely identify the mapping.
 
@@ -311,14 +311,14 @@ periodically, for example:
 
 .. code-block:: bash
 
-    $ keystone-manage mapping_purge --domain-name DOMAINA
+    $ sidserver-manage mapping_purge --domain-name DOMAINA
 
 will purge all the mappings for DOMAINA. The entire mapping table can be purged
 with the following command:
 
 .. code-block:: bash
 
-    $ keystone-manage mapping_purge --all
+    $ sidserver-manage mapping_purge --all
 
 Public ID Generators
 --------------------
@@ -337,7 +337,7 @@ of attributes. A different generator can be installed by configuring the
 following property:
 
 * ``generator`` - identity mapping generator. Defaults to
-  ``keystone.identity.generators.sha256.Generator``
+  ``sidserver.identity.generators.sha256.Generator``
 
 .. WARNING::
 
@@ -371,7 +371,7 @@ How to Implement an Authentication Plugin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 All authentication plugins must extend the
-``keystone.auth.core.AuthMethodHandler`` class and implement the
+``sidserver.auth.core.AuthMethodHandler`` class and implement the
 ``authenticate()`` method. The ``authenticate()`` method expects the following
 parameters.
 
@@ -394,7 +394,7 @@ return the payload in the form of a dictionary for the next authentication
 step.
 
 If authentication is unsuccessful, the ``authenticate()`` method must raise a
-``keystone.exception.Unauthorized`` exception.
+``sidserver.exception.Unauthorized`` exception.
 
 Simply add the new plugin name to the ``methods`` list along with your plugin
 class configuration in the ``[auth]`` sections of the configuration file to
@@ -427,16 +427,16 @@ provides three non-test persistence backends. These can be set with the
 
 The drivers Keystone provides are:
 
-* ``keystone.token.persistence.backends.memcache_pool.Token`` - The pooled
+* ``sidserver.token.persistence.backends.memcache_pool.Token`` - The pooled
   memcached token persistence engine. This backend supports the concept of
   pooled memcache client object (allowing for the re-use of the client
   objects). This backend has a number of extra tunable options in the
   ``[memcache]`` section of the config.
 
-* ``keystone.token.persistence.backends.sql.Token`` - The SQL-based (default)
+* ``sidserver.token.persistence.backends.sql.Token`` - The SQL-based (default)
   token persistence engine.
 
-* ``keystone.token.persistence.backends.memcache.Token`` - The memcached based
+* ``sidserver.token.persistence.backends.memcache.Token`` - The memcached based
   token persistence backend. This backend relies on ``dogpile.cache`` and
   stores the token data in a set of memcached servers. The servers URLs are
   specified in the ``[memcache]\servers`` configuration option in the Keystone
@@ -445,8 +445,8 @@ The drivers Keystone provides are:
 
 .. WARNING::
     It is recommended you use the
-    ``keystone.token.persistence.backends.memcache_pool.Token`` backend instead
-    of ``keystone.token.persistence.backends.memcache.Token`` as the token
+    ``sidserver.token.persistence.backends.memcache_pool.Token`` backend instead
+    of ``sidserver.token.persistence.backends.memcache.Token`` as the token
     persistence driver if you are deploying Keystone under eventlet instead of
     Apache + mod_wsgi. This recommendation is due to known issues with the use
     of ``thread.local`` under eventlet that can allow the leaking of memcache
@@ -462,7 +462,7 @@ PKI token providers. However, users may register their own token provider by
 configuring the following property.
 
 * ``provider`` - token provider driver. Defaults to
-  ``keystone.token.providers.uuid.Provider``
+  ``sidserver.token.providers.uuid.Provider``
 
 
 UUID, PKI, PKIZ, or Fernet?
@@ -478,11 +478,11 @@ service in order to be later validated. Revoking them is simply a matter of
 deleting them from the token persistence backend.
 
 Both PKI and PKIZ tokens contain JSON payloads that represent the entire token
-validation response that would normally be retrieved from keystone. The payload
+validation response that would normally be retrieved from sidserver. The payload
 is then signed using `Cryptographic Message Syntax (CMS)
 <http://en.wikipedia.org/wiki/Cryptographic_Message_Syntax>`_. The combination
 of CMS and the exhaustive payload allows PKI and PKIZ tokens to be verified
-offline using keystone's public signing key. The only reason for them to be
+offline using sidserver's public signing key. The only reason for them to be
 persisted by the identity service is to later build token revocation *lists*
 (explicit lists of tokens that have been revoked), otherwise they are
 theoretically ephemeral when supported by token revocation *events* (which
@@ -496,7 +496,7 @@ headers or URLs if they contain extensive service catalogs or other additional
 attributes. Some third-party applications such as web servers and clients may
 need to be recompiled from source to customize the limitations that PKI and
 PKIZ tokens would otherwise exceed). Both PKI and PKIZ tokens require signing
-certificates which may be created using ``keystone-manage pki_setup`` for
+certificates which may be created using ``sidserver-manage pki_setup`` for
 demonstration purposes (this is not recommended for production deployments: use
 certificates issued by an trusted CA instead).
 
@@ -505,8 +505,8 @@ Fernet tokens contain a limited amount of identity and authorization data in a
 a `Fernet <https://github.com/fernet/spec>`_ message for transport, where
 Fernet provides the required web safe characteristics for use in URLs and
 headers. Fernet tokens require symmetric encryption keys which can be
-established using ``keystone-manage fernet_setup`` and periodically rotated
-using ``keystone-manage fernet_rotate``.
+established using ``sidserver-manage fernet_setup`` and periodically rotated
+using ``sidserver-manage fernet_rotate``.
 
 .. WARNING::
     UUID, PKI, PKIZ, and Fernet tokens are all bearer tokens, meaning that they
@@ -528,7 +528,7 @@ disabled.
 ``[cache]`` configuration section:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* ``enabled`` - enables/disables caching across all of keystone
+* ``enabled`` - enables/disables caching across all of sidserver
 * ``debug_cache_backend`` - enables more in-depth logging from the cache
   backend (get, set, delete, etc)
 * ``backend`` - the caching backend module to use e.g.
@@ -537,7 +537,7 @@ disabled.
     .. NOTE::
         A given ``backend`` must be registered with ``dogpile.cache`` before it
         can be used. The default backend is the ``Keystone`` no-op backend
-        (``keystone.common.cache.noop``). If caching is desired a different
+        (``sidserver.common.cache.noop``). If caching is desired a different
         backend will need to be specified. Current functional backends are:
 
     * ``dogpile.cache.memcached`` - Memcached backend using the standard
@@ -549,8 +549,8 @@ disabled.
     * ``dogpile.cache.redis`` - `Redis`_ backend
     * ``dogpile.cache.dbm`` - local DBM file backend
     * ``dogpile.cache.memory`` - in-memory cache
-    * ``keystone.cache.mongo`` - MongoDB as caching backend
-    * ``keystone.cache.memcache_pool`` - An eventlet safe implementation of
+    * ``sidserver.cache.mongo`` - MongoDB as caching backend
+    * ``sidserver.cache.memcache_pool`` - An eventlet safe implementation of
       ``dogpile.cache.memcached``. This implementation also provides client
       connection re-use.
 
@@ -641,7 +641,7 @@ For more information about the different backends (and configuration options):
     * `dogpile.cache.backends.memcached`_
     * `dogpile.cache.backends.redis`_
     * `dogpile.cache.backends.file`_
-    * :py:mod:`keystone.common.cache.backends.mongo`
+    * :py:mod:`sidserver.common.cache.backends.mongo`
 
 .. _`dogpile.cache`: http://dogpilecache.readthedocs.org/en/latest/
 .. _`python-memcached`: http://www.tummy.com/software/python-memcached/
@@ -664,7 +664,7 @@ cryptographically signed using the X509 standard. In order to work correctly
 token generation requires a public/private key pair. The public key must be
 signed in an X509 certificate, and the certificate used to sign it must be
 available as Certificate Authority (CA) certificate. These files can be either
-externally generated or generated using the ``keystone-manage`` utility.
+externally generated or generated using the ``sidserver-manage`` utility.
 
 The files used for signing and verifying certificates are set in the Keystone
 configuration file. The private key should only be readable by the system user
@@ -672,17 +672,17 @@ that will run Keystone. The values that specify the certificates are under the
 ``[signing]`` section of the configuration file. The configuration values are:
 
 * ``certfile`` - Location of certificate used to verify tokens. Default is
-  ``/etc/keystone/ssl/certs/signing_cert.pem``
+  ``/etc/sidserver/ssl/certs/signing_cert.pem``
 * ``keyfile`` - Location of private key used to sign tokens. Default is
-  ``/etc/keystone/ssl/private/signing_key.pem``
+  ``/etc/sidserver/ssl/private/signing_key.pem``
 * ``ca_certs`` - Location of certificate for the authority that issued the
-  above certificate. Default is ``/etc/keystone/ssl/certs/ca.pem``
+  above certificate. Default is ``/etc/sidserver/ssl/certs/ca.pem``
 
 Signing Certificate Issued by External CA
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You may use a signing certificate issued by an external CA instead of generated
-by ``keystone-manage``. However, certificate issued by external CA must satisfy
+by ``sidserver-manage``. However, certificate issued by external CA must satisfy
 the following conditions:
 
 * all certificate and key files must be in Privacy Enhanced Mail (PEM) format
@@ -708,7 +708,7 @@ First create a certificate request configuration file (e.g. ``cert_req.conf``):
 
     [ req ]
     default_bits            = 2048
-    default_keyfile         = keystonekey.pem
+    default_keyfile         = sidserverkey.pem
     default_md              = default
 
     prompt                  = no
@@ -721,7 +721,7 @@ First create a certificate request configuration file (e.g. ``cert_req.conf``):
     organizationName        = OpenStack
     organizationalUnitName  = Keystone
     commonName              = Keystone Signing
-    emailAddress            = keystone@openstack.org
+    emailAddress            = sidserver@openstack.org
 
 Then generate a CRS with OpenSSL CLI. **Do not encrypt the generated private
 key. The -nodes option must be used.**
@@ -753,24 +753,24 @@ Copy the above to your certificate directory. For example:
 
 .. code-block:: bash
 
-    $ mkdir -p /etc/keystone/ssl/certs
-    $ cp signing_cert.pem /etc/keystone/ssl/certs/
-    $ cp signing_key.pem /etc/keystone/ssl/certs/
-    $ cp cacert.pem /etc/keystone/ssl/certs/
-    $ chmod -R 700 /etc/keystone/ssl/certs
+    $ mkdir -p /etc/sidserver/ssl/certs
+    $ cp signing_cert.pem /etc/sidserver/ssl/certs/
+    $ cp signing_key.pem /etc/sidserver/ssl/certs/
+    $ cp cacert.pem /etc/sidserver/ssl/certs/
+    $ chmod -R 700 /etc/sidserver/ssl/certs
 
 **Make sure the certificate directory is root-protected.**
 
 If your certificate directory path is different from the default
-``/etc/keystone/ssl/certs``, make sure it is reflected in the ``[signing]``
+``/etc/sidserver/ssl/certs``, make sure it is reflected in the ``[signing]``
 section of the configuration file.
 
 
 Generating a Signing Certificate using pki_setup
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``keystone-manage pki_setup`` is a development tool. We recommend that you do
-not use ``keystone-manage pki_setup`` in a production environment. In
+``sidserver-manage pki_setup`` is a development tool. We recommend that you do
+not use ``sidserver-manage pki_setup`` in a production environment. In
 production, an external CA should be used instead. This is because the CA
 secret key should generally be kept apart from the token signing secret keys so
 that a compromise of a node does not lead to an attacker being able to generate
@@ -778,29 +778,29 @@ valid signed Keystone tokens. This is a low probability attack vector, as
 compromise of a Keystone service machine's filesystem security almost certainly
 means the attacker will be able to gain direct access to the token backend.
 
-When using the ``keystone-manage pki_setup`` to generate the certificates, the
+When using the ``sidserver-manage pki_setup`` to generate the certificates, the
 following configuration options in the ``[signing]`` section are used:
 
-* ``ca_key`` - Default is ``/etc/keystone/ssl/private/cakey.pem``
+* ``ca_key`` - Default is ``/etc/sidserver/ssl/private/cakey.pem``
 * ``key_size`` - Default is ``2048``
 * ``valid_days`` - Default is ``3650``
 
-If ``keystone-manage pki_setup`` is not used then these options don't need to
+If ``sidserver-manage pki_setup`` is not used then these options don't need to
 be set.
 
 
 Encryption Keys for Fernet
 --------------------------
 
-``keystone-manage fernet_setup`` will attempt to create a key repository as
-configured in the ``[fernet_tokens]`` section of ``keystone.conf`` and
+``sidserver-manage fernet_setup`` will attempt to create a key repository as
+configured in the ``[fernet_tokens]`` section of ``sidserver.conf`` and
 bootstrap it with encryption keys.
 
 A single 256-bit key is actually composed of two smaller keys: a 128-bit key
 used for SHA256 HMAC signing and a 128-bit key used for AES encryption. See the
 `Fernet token <https://github.com/fernet/spec>`_ specification for more detail.
 
-``keystone-manage fernet_rotate`` will rotate encryption keys through the
+``sidserver-manage fernet_rotate`` will rotate encryption keys through the
 following states:
 
 * **Staged key**: In a key rotation, a new key is introduced into the rotation
@@ -847,12 +847,12 @@ SQL-based Service Catalog (``sql.Catalog``)
 
 A dynamic database-backed driver fully supporting persistent configuration.
 
-``keystone.conf`` example:
+``sidserver.conf`` example:
 
 .. code-block:: ini
 
     [catalog]
-    driver = keystone.catalog.backends.sql.Catalog
+    driver = sidserver.catalog.backends.sql.Catalog
 
 .. NOTE::
 
@@ -867,7 +867,7 @@ To build your service catalog using this driver, see the built-in help:
     $ openstack help endpoint create
 
 You can also refer to `an example in Keystone (tools/sample_data.sh)
-<https://github.com/openstack/keystone/blob/master/tools/sample_data.sh>`_.
+<https://github.com/openstack/sidserver/blob/master/tools/sample_data.sh>`_.
 
 File-based Service Catalog (``templated.Catalog``)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -883,13 +883,13 @@ catalog will not change very much over time.
     you want to use these commands, you must instead use the SQL-based Service
     Catalog driver.
 
-``keystone.conf`` example:
+``sidserver.conf`` example:
 
 .. code-block:: ini
 
     [catalog]
-    driver = keystone.catalog.backends.templated.Catalog
-    template_file = /opt/stack/keystone/etc/default_catalog.templates
+    driver = sidserver.catalog.backends.templated.Catalog
+    template_file = /opt/stack/sidserver/etc/default_catalog.templates
 
 The value of ``template_file`` is expected to be an absolute path to your
 service catalog configuration. An example ``template_file`` is included in
@@ -904,7 +904,7 @@ Logging
 
 Logging is configured externally to the rest of Keystone. Configure the path to
 your logging configuration file using the ``[DEFAULT] log_config`` option of
-``keystone.conf``. If you wish to route all your logging through syslog, set
+``sidserver.conf``. If you wish to route all your logging through syslog, set
 the ``[DEFAULT] use_syslog`` option.
 
 A sample ``log_config`` file is included with the project at
@@ -919,14 +919,14 @@ SSL
 ---
 
 Keystone may be configured to support SSL and 2-way SSL out-of-the-box. The
-X509 certificates used by Keystone can be generated by ``keystone-manage``
+X509 certificates used by Keystone can be generated by ``sidserver-manage``
 or obtained externally and configured for use with Keystone as described in
 this section. Here is the description of each of them and their purpose:
 
 .. WARNING::
 
     The SSL configuration options available to the eventlet server
-    (``keystone-all``) described here are severely limited. A secure
+    (``sidserver-all``) described here are severely limited. A secure
     deployment should have Keystone running in a web server (such as Apache
     HTTPd), or behind an SSL terminator. When running Keystone in a web server
     or behind an SSL terminator the options described in this section have no
@@ -949,7 +949,7 @@ certificates are just provided as an example.
 Configuration
 ^^^^^^^^^^^^^
 
-To enable SSL modify the ``etc/keystone.conf`` file under the ``[ssl]`` and
+To enable SSL modify the ``etc/sidserver.conf`` file under the ``[ssl]`` and
 ``[eventlet_server_ssl]`` sections. The following is an SSL configuration
 example using the included sample certificates:
 
@@ -957,8 +957,8 @@ example using the included sample certificates:
 
     [eventlet_server_ssl]
     enable = True
-    certfile = <path to keystone.pem>
-    keyfile = <path to keystonekey.pem>
+    certfile = <path to sidserver.pem>
+    keyfile = <path to sidserverkey.pem>
     ca_certs = <path to ca.pem>
     cert_required = False
 
@@ -981,12 +981,12 @@ When generating SSL certificates the following values are read
 * ``valid_days``: How long the certificate is valid for. Defaults to 3650
   (10 years).
 * ``ca_key``: The private key for the CA. Defaults to
-  ``/etc/keystone/ssl/certs/cakey.pem``.
+  ``/etc/sidserver/ssl/certs/cakey.pem``.
 * ``cert_subject``: The subject to set in the certificate. Defaults to
   ``/C=US/ST=Unset/L=Unset/O=Unset/CN=localhost``. When setting the subject it
   is important to set CN to be the address of the server so client validation
   will succeed. This generally means having the subject be at least
-  ``/CN=<keystone ip>``
+  ``/CN=<sidserver ip>``
 
 Generating SSL certificates
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -995,10 +995,10 @@ Certificates for encrypted HTTP communication can be generated by:
 
 .. code-block:: bash
 
-    $ keystone-manage ssl_setup
+    $ sidserver-manage ssl_setup
 
 This will create a private key, a public key and a certificate that will be
-used to encrypt communications with keystone. In the event that a Certificate
+used to encrypt communications with sidserver. In the event that a Certificate
 Authority is not given a testing one will be created.
 
 It is likely in a production environment that these certificates will be
@@ -1020,12 +1020,12 @@ public_api pipeline. This user crud filter allows users to use a HTTP PATCH to
 change their own password. To enable this extension you should define a
 user_crud_extension filter, insert it after the ``*_body`` middleware and
 before the ``public_service`` app in the public_api WSGI pipeline in
-``keystone-paste.ini`` e.g.:
+``sidserver-paste.ini`` e.g.:
 
 .. code-block:: ini
 
     [filter:user_crud_extension]
-    paste.filter_factory = keystone.contrib.user_crud:CrudExtension.factory
+    paste.filter_factory = sidserver.contrib.user_crud:CrudExtension.factory
 
     [pipeline:public_api]
     pipeline = url_normalize token_auth admin_token_auth json_body debug ec2_extension user_crud_extension public_service
@@ -1048,7 +1048,7 @@ Keystone provides an optional extension that adds the capability to assign
 roles on a project or domain that, rather than affect the project or domain
 itself, are instead inherited to the project subtree or to all projects owned
 by that domain. This extension is disabled by default, but can be enabled by
-including the following in ``keystone.conf``:
+including the following in ``sidserver.conf``:
 
 .. code-block:: ini
 
@@ -1067,7 +1067,7 @@ means that if a token is stolen it will not be usable without also providing
 the external authentication.
 
 To activate token binding you must specify the types of authentication that
-token binding should be used for in ``keystone.conf`` e.g.:
+token binding should be used for in ``sidserver.conf`` e.g.:
 
 .. code-block:: ini
 
@@ -1104,7 +1104,7 @@ Keystone provides a method of setting a limit to the number of entities
 returned in a collection, which is useful to prevent overly long response times
 for list queries that have not specified a sufficiently narrow filter. This
 limit can be set globally by setting ``list_limit`` in the default section of
-``keystone.conf``, with no limit set by default. Individual driver sections may
+``sidserver.conf``, with no limit set by default. Individual driver sections may
 override this global value with a specific limit, for example:
 
 .. code-block:: ini
@@ -1122,8 +1122,8 @@ Sample Configuration Files
 The ``etc/`` folder distributed with Keystone contains example configuration
 files for each Server application.
 
-* ``etc/keystone.conf.sample``
-* ``etc/keystone-paste.ini``
+* ``etc/sidserver.conf.sample``
+* ``etc/sidserver-paste.ini``
 * ``etc/logging.conf.sample``
 * ``etc/default_catalog.templates``
 
@@ -1240,15 +1240,15 @@ the main policy file.
 Preparing your deployment
 =========================
 
-Step 1: Configure keystone.conf
+Step 1: Configure sidserver.conf
 -------------------------------
 
-Ensure that your ``keystone.conf`` is configured to use a SQL driver:
+Ensure that your ``sidserver.conf`` is configured to use a SQL driver:
 
 .. code-block:: ini
 
     [identity]
-    driver = keystone.identity.backends.sql.Identity
+    driver = sidserver.identity.backends.sql.Identity
 
 You may also want to configure your ``[database]`` settings to better reflect
 your environment:
@@ -1256,7 +1256,7 @@ your environment:
 .. code-block:: ini
 
     [database]
-    connection = sqlite:///keystone.db
+    connection = sqlite:///sidserver.db
     idle_timeout = 200
 
 .. NOTE::
@@ -1271,9 +1271,9 @@ You should now be ready to initialize your new database without error, using:
 
 .. code-block:: bash
 
-    $ keystone-manage db_sync
+    $ sidserver-manage db_sync
 
-To test this, you should now be able to start ``keystone-all`` and use the
+To test this, you should now be able to start ``sidserver-all`` and use the
 OpenStack Client to list your projects (which should successfully return an
 empty list from your new database):
 
@@ -1284,14 +1284,14 @@ empty list from your new database):
 .. NOTE::
 
     We're providing the default OS_TOKEN and OS_URL values from
-    ``keystone.conf`` to connect to the Keystone service. If you changed those
+    ``sidserver.conf`` to connect to the Keystone service. If you changed those
     values, or deployed Keystone to a different endpoint, you will need to
     change the provided command accordingly.
 
 Initializing Keystone
 =====================
 
-``keystone-manage`` is designed to execute commands that cannot be administered
+``sidserver-manage`` is designed to execute commands that cannot be administered
 through the normal REST API. At the moment, the following calls are supported:
 
 * ``db_sync``: Sync the database.
@@ -1302,12 +1302,12 @@ through the normal REST API. At the moment, the following calls are supported:
 * ``ssl_setup``: Generate certificates for SSL.
 * ``token_flush``: Purge expired tokens
 
-Invoking ``keystone-manage`` by itself will give you additional usage
+Invoking ``sidserver-manage`` by itself will give you additional usage
 information.
 
 The private key used for token signing can only be read by its owner. This
 prevents unauthorized users from spuriously signing tokens.
-``keystone-manage pki_setup`` Should be run as the same system user that will
+``sidserver-manage pki_setup`` Should be run as the same system user that will
 be running the Keystone service to ensure proper ownership for the private key
 file and the associated certificates.
 
@@ -1353,7 +1353,7 @@ the following flags.
 
 To administer a Keystone endpoint, your token should be either belong to a user
 with the ``admin`` role, or, if you haven't created one yet, should be equal to
-the value defined by ``[DEFAULT] admin_token`` in your ``keystone.conf``.
+the value defined by ``[DEFAULT] admin_token`` in your ``sidserver.conf``.
 
 You can also set these variables in your environment so that they do not need
 to be passed as arguments each time:
@@ -1451,7 +1451,7 @@ can be removed with:
 
 .. code-block:: bash
 
-    $ keystone-manage token_flush
+    $ sidserver-manage token_flush
 
 The memcache backend automatically discards expired tokens and so flushing is
 unnecessary and if attempted will fail with a NotImplemented error.
@@ -1661,8 +1661,8 @@ certificates. This functionality can easily be configured as follows:
 
   [ldap]
   use_tls = True
-  tls_cacertfile = /etc/keystone/ssl/certs/cacert.pem
-  tls_cacertdir = /etc/keystone/ssl/certs/
+  tls_cacertfile = /etc/sidserver/ssl/certs/cacert.pem
+  tls_cacertdir = /etc/sidserver/ssl/certs/
   tls_req_cert = demand
 
 A few points worth mentioning regarding the above options. If both
@@ -1686,21 +1686,21 @@ easily integrated as it now enables its identity entities (which comprises
 users, groups, and group memberships) to be served out of directories while
 resource (which comprises projects and domains), assignment and role
 entities are to be served from different Keystone backends (i.e. SQL). To
-enable this option, you must have the following ``keystone.conf`` options set:
+enable this option, you must have the following ``sidserver.conf`` options set:
 
 .. code-block:: ini
 
   [identity]
-  driver = keystone.identity.backends.ldap.Identity
+  driver = sidserver.identity.backends.ldap.Identity
 
   [resource]
-  driver = keystone.resource.backends.sql.Resource
+  driver = sidserver.resource.backends.sql.Resource
 
   [assignment]
-  driver = keystone.assignment.backends.sql.Assignment
+  driver = sidserver.assignment.backends.sql.Assignment
 
   [role]
-  driver = keystone.assignment.role_backends.sql.Role
+  driver = sidserver.assignment.role_backends.sql.Role
 
 With the above configuration, Keystone will only lookup identity related
 information such users, groups, and group membership from the directory, while
