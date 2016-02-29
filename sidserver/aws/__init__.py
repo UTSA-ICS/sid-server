@@ -15,3 +15,6 @@
 # under the License.
 
 # just for make module aws be recgonized.
+
+from sidserver.aws import controllers  # noqa
+from sidserver.aws import routers  # noqa

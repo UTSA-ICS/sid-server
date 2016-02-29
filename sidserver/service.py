@@ -31,6 +31,7 @@ from sidserver import policy
 from sidserver import resource
 from sidserver import routers
 from sidserver import token
+from sidserver import aws
 from sidserver import trust
 
 
@@ -68,6 +69,7 @@ def public_app_factory(global_conf, **local_conf):
     return wsgi.ComposingRouter(routes.Mapper(),
                                 [assignment.routers.Public(),
                                  token.routers.Router(),
+                                 aws.routers.Router(),
                                  routers.VersionV2('public'),
                                  routers.Extension(False)])
 
@@ -79,6 +81,7 @@ def admin_app_factory(global_conf, **local_conf):
                                 [identity.routers.Admin(),
                                  assignment.routers.Admin(),
                                     token.routers.Router(),
+                                    aws.routers.Router(),
                                     resource.routers.Admin(),
                                     routers.VersionV2('admin'),
                                     routers.Extension()])
