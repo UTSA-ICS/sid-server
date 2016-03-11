@@ -24,15 +24,15 @@ from oslo_serialization import jsonutils
 from oslo_utils import timeutils
 import six
 
-from sidserver.common import controller
-from sidserver.common import dependency
-from sidserver.common import wsgi
-from sidserver import exception
-from sidserver.i18n import _
-from sidserver.models import token_model
-from sidserver.token import provider
+from keystone.common import controller
+from keystone.common import dependency
+from keystone.common import wsgi
+from keystone import exception
+from keystone.i18n import _
+from keystone.models import token_model
+from keystone.token import provider
 
-from sidserver.aws import aws_sip
+from keystone.aws import aws_sip
 
 
 CONF = cfg.CONF
@@ -427,7 +427,7 @@ class Auth(controller.V2Controller):
 
         Identical to ``validate_token``, except does not return a response.
 
-        The code in ``sidserver.common.wsgi.render_response`` will remove
+        The code in ``keystone.common.wsgi.render_response`` will remove
         the content body.
 
         """
@@ -552,138 +552,105 @@ class Auth(controller.V2Controller):
         sip_create = aws_sip.sip_create(aws_access_key_id, aws_access_secret_key)
         return sip_create
 
-    def create_policy(self, context, auth=None):
-        print("%%%%%%%%%%%%%%%%%%%%% In sip_create function. %%%%%%%%%%%%%%%%%%%")
+    def get_user(self, context, auth=None):
+        print("%%%%%%%%%%%%%%%%%%% In controller get_user function. %%%%%%%%%%%%%%%%%%")
 	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
 	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
-	policy_name = "assumeRole1"
-	policy_doc = ''
-#	policy_doc = '{
-#    			"Version": "2012-10-17",
-#    			"Statement": [
-#        			{
-#            			"Effect": "Allow",
-#            			"Action": "sts:AssumeRole",
-#            			"Resource": "arn:aws:iam::*:*"
-#        			}
-#    			]
-#			}'
-        policy = aws_sip.create_policy(aws_access_key_id, aws_access_secret_key, policy_name, policy_doc)
+        response = aws_sip.get_user(aws_access_key_id, aws_access_secret_key)
+	print("response: ",response)
+	print("")
+        return response
 
-    def authenticate_aws(self, context, auth=None):
-        """Authenticate credentials and return a token for AWS.
-        Accept auth as a dict that looks like::
-            {
-                "auth":{
-                    "passwordCredentials":{
-                        "username":"test_user",
-                        "password":"mypass"
-                    },
-                    "tenantName":"customer-x"
-                }
+    def get_policy(self, context, auth=None):
+        print("%%%%%%%%%%%%%%%%%%% In controller get_policy function. %%%%%%%%%%%%%%%%%%")
+	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+	policy_arn = 'arn:aws:iam::934324332443:policy/AssumeRole'
+        response = aws_sip.policy_get(aws_access_key_id, aws_access_secret_key, policy_arn)
+	print("response: ",response)
+	print("")
+        return response
+
+    def policy_delete(self, context, auth=None):
+	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+	#policy_arn = 'arn:aws:iam::934324332443:policy/AssumeRole'
+        response = aws_sip.policy_delete(aws_access_key_id, aws_access_secret_key, policy_arn)
+	print("response: ",response)
+	print("")
+        return response
+
+    def policy_create(self, context, auth=None):
+        print("%%%%%%%%%%%%%%%%%%% In controller create_policy function. %%%%%%%%%%%%%%%%%%")
+	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+	policy_name = "AssumeRoleTest"
+	#policy_doc = ""
+        policy_doc = """{
+	    "Version": "2012-10-17",
+	    "Statement": [
+	        {
+	            "Effect": "Allow",
+	            "Action": "sts:AssumeRole",
+	            "Resource": "arn:aws:iam::*:*"
+	        }
+	      ]
             }
-        In this case, tenant is optional, if not provided the token will be
-        considered "unscoped" and can later be used to get a scoped token.
-        Alternatively, this call accepts auth with only a token and tenant
-        that will return a token that is scoped to that tenant.
-        """
+            """
 
-        if auth is None:
-            raise exception.ValidationError(attribute='auth',
-                                            target='request body')
+        response = aws_sip.policy_create(aws_access_key_id, aws_access_secret_key, policy_name, policy_doc)
+	print("response: ",response)
+	print("")
+        return response
 
-        auth_token_data = None
+    def role_get(self, context, auth=None):
+	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+	role_name = "SIPadmin"
+        response = aws_sip.role_get(aws_access_key_id, aws_access_secret_key, role_name)
+	print("response: ",response)
+	print("")
+        return response
 
-        if "token" in auth:
-            # Try to authenticate using a token
-            auth_info = self._authenticate_token(
-                context, auth)
-        else:
-            # Try external authentication
-            try:
-                auth_info = self._authenticate_external(
-                    context, auth)
-            except ExternalAuthNotApplicable:
-                # Try local authentication
-                auth_info = self._authenticate_local(
-                    context, auth)
+    def role_create(self, context, auth=None):
+        print("%%%%%%%%%%%%%%%%%%% In controller create_role function. %%%%%%%%%%%%%%%%%%")
+	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+	path = "/"
+	role_name = "SIPadmin"
+	assume_role_policy_doc = ""
+        response = aws_sip.role_create(aws_access_key_id, aws_access_secret_key, path, role_name, assume_role_policy_doc)
+	print("response: ",response)
+	print("")
+        return response
 
-        user_ref, tenant_ref, metadata_ref, expiry = auth_info
-        core.validate_auth_info(self, context, user_ref, tenant_ref)
-        trust_id = metadata_ref.get('trust_id')
-        user_ref = self._filter_domain_id(user_ref)
-        if tenant_ref:
-            tenant_ref = self._filter_domain_id(tenant_ref)
-        auth_token_data = self._get_auth_token_data(user_ref,
-                                                    tenant_ref,
-                                                    metadata_ref,
-                                                    expiry)
+    def role_delete(self, context, auth=None):
+	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+	role_name = "SIPadmin"
+        response = aws_sip.role_delete(aws_access_key_id, aws_access_secret_key, role_name)
+	print("response: ",response)
+	print("")
+        return response
 
-        if tenant_ref:
-            catalog_ref = self.catalog_api.get_catalog(
-                context=context,
-                user_id=user_ref['id'],
-                tenant_id=tenant_ref['id'],
-                metadata=metadata_ref)
-        else:
-            catalog_ref = {}
+    def attach_user_policy(self, context, auth=None):
+        print("%%%%%%%%%%%%%%%%%%% In controller attach_user_policy function. %%%%%%%%%%%%%%%%%%")
+	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+	user_name = ""
+	policy_arn = ""
+        response = aws_sip.attach_user_policy(aws_access_key_id, aws_access_secret_key, user_name, policy_arn)
+	print("response: ",response)
+	print("")
+        return response
 
-        auth_token_data['id'] = 'placeholder'
-
-        roles_ref = []
-        for role_id in metadata_ref.get('roles', []):
-            role_ref = self.identity_api.get_role(context, role_id)
-            roles_ref.append(dict(name=role_ref['name']))
-
-        token_data = Auth.format_token(auth_token_data, roles_ref)
-
-        service_catalog = Auth.format_catalog(catalog_ref)
-        token_data['access']['serviceCatalog'] = service_catalog
-
-        if CONF.signing.token_format == 'UUID':
-            token_id = uuid.uuid4().hex
-        elif CONF.signing.token_format == 'PKI':
-            try:
-                token_id = cms.cms_sign_token(json.dumps(token_data),
-                                              CONF.signing.certfile,
-                                              CONF.signing.keyfile)
-            except subprocess.CalledProcessError:
-                raise exception.UnexpectedError(_(
-                    'Unable to sign token.'))
-        else:
-            raise exception.UnexpectedError(_(
-                'Invalid value for token_format: %s.'
-                '  Allowed values are PKI or UUID.') %
-                CONF.signing.token_format)
-        try:
-            self.token_api.create_token(
-                context, token_id, dict(key=token_id,
-                                        id=token_id,
-                                        expires=auth_token_data['expires'],
-                                        user=user_ref,
-                                        tenant=tenant_ref,
-                                        metadata=metadata_ref,
-                                        trust_id=trust_id))
-        except Exception as e:
-            # an identical token may have been created already.
-            # if so, return the token_data as it is also identical
-            try:
-                self.token_api.get_token(context=context,
-                                         token_id=token_id)
-            except exception.TokenNotFound:
-                raise e
-
-        token_data['access']['token']['id'] = token_id
-        print "token data is ===>", token_data['access']
-        print "token data is ===>", token_data['access']['user']
-        print "token data is ===>", token_data['access']['user']['roles'][0]['name']
-	credential = aws_federated_token.generate_sts_token(token_data['access']['user']['roles'][0]['name'])
-        token_data['access']['token']['access_key'] = credential.access_key
-        token_data['access']['token']['secret_key'] = credential.secret_key
-        token_data['access']['token']['session_token'] = credential.session_token
-
-        return token_data
-
-
-
-
+    def attach_role_policy(self, context, auth=None):
+        print("%%%%%%%%%%%%%%%%%%% In controller attach_role_policy function. %%%%%%%%%%%%%%%%%%")
+	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+	role_name = ""
+	policy_arn = ""
+        response = aws_sip.attach_user_policy(aws_access_key_id, aws_access_secret_key, role_name, policy_arn)
+	print("response: ",response)
+	print("")
+        return response

@@ -17,7 +17,7 @@ import traceback
 import datetime
 import sys
 
-from keystoneclient.common import cms
+#from keystoneclient.common import cms
 from oslo_config import cfg
 from oslo_log import log
 from oslo_serialization import jsonutils
@@ -75,21 +75,45 @@ class AWS(wsgi.Application):
 	print("")
         return response
 
-    def policy_get(self, context, auth=None):
-        print("%%%%%%%%%%%%%%%%%%% In controller get_policy function. %%%%%%%%%%%%%%%%%%")
+    def user_create(self, context, auth=None):
 	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
 	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
-	policy_arn = 'arn:aws:iam::934324332443:policy/AssumeRole'
-        response = aws_sip.policy_get(aws_access_key_id, aws_access_secret_key, policy_arn)
+	user_name = context['environment']['openstack.params']['auth']['AWS_USER_NAME']
+	path='/'
+        response = aws_sip.user_create(aws_access_key_id, aws_access_secret_key, path, user_name)
 	print("response: ",response)
 	print("")
         return response
 
-    def policy_delete(self, context, auth=None):
+    def user_delete(self, context, auth=None):
 	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
 	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
-	#policy_arn = 'arn:aws:iam::934324332443:policy/AssumeRole'
-        response = aws_sip.policy_delete(aws_access_key_id, aws_access_secret_key, policy_arn)
+	user_name = context['environment']['openstack.params']['auth']['AWS_USER_NAME']
+        response = aws_sip.user_delete(aws_access_key_id, aws_access_secret_key, user_name)
+	print("response: ",response)
+	print("")
+        return response
+
+    def policies_list(self, context, auth=None):
+	#print("The openstack_parms IS --> ", context['environment']['openstack.params'])
+	#print("The context environment IS --> ", context['environment'])
+	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+	scope='Local'
+	onlyattached=False
+	path = "/"
+	#marker=''
+        response = aws_sip.policies_list(aws_access_key_id, aws_access_secret_key, scope, onlyattached, path)
+	print("response: ",response)
+	print("")
+        return response
+
+    def policy_get(self, context, auth=None):
+        print("%%%%%%%%%%%%%%%%%%% In controller get_policy function. %%%%%%%%%%%%%%%%%%")
+	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+	policy_arn = context['environment']['openstack.params']['auth']['AWS_POLICY_ARN']
+        response = aws_sip.policy_get(aws_access_key_id, aws_access_secret_key, policy_arn)
 	print("response: ",response)
 	print("")
         return response
@@ -98,22 +122,49 @@ class AWS(wsgi.Application):
         print("%%%%%%%%%%%%%%%%%%% In controller create_policy function. %%%%%%%%%%%%%%%%%%")
 	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
 	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
-	policy_name = "AssumeRoleTest"
-	#policy_doc = ""
+	policy_name = context['environment']['openstack.params']['auth']['AWS_POLICY_NAME']
+	#policy_name = "AssumeRoleTest"
         policy_doc = "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"sts:AssumeRole\",\"Resource\":\"arn:aws:iam::*:*\"}]}"
-
         response = aws_sip.policy_create(aws_access_key_id, aws_access_secret_key, policy_name, policy_doc)
 	print("response: ",response)
 	print("")
         return response
 
-    def role_create(self, context, auth=None):
-        print("%%%%%%%%%%%%%%%%%%% In controller create_role function. %%%%%%%%%%%%%%%%%%")
+    def policy_delete(self, context, auth=None):
+	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+	policy_arn = context['environment']['openstack.params']['auth']['AWS_POLICY_ARN']
+        response = aws_sip.policy_delete(aws_access_key_id, aws_access_secret_key, policy_arn)
+	print("response: ",response)
+	print("")
+        return response
+
+    def roles_list(self, context, auth=None):
 	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
 	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
 	path = "/"
-	role_name = "SIPadmin"
-	assume_role_policy_doc = ""
+	#marker=''
+        response = aws_sip.roles_list(aws_access_key_id, aws_access_secret_key, path)
+	print("response: ",response)
+	print("")
+        return response
+
+    def role_get(self, context, auth=None):
+	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+	role_name = context['environment']['openstack.params']['auth']['AWS_ROLE_NAME']
+        response = aws_sip.role_get(aws_access_key_id, aws_access_secret_key, role_name)
+	print("response: ",response)
+	print("")
+        return response
+
+    def role_create(self, context, auth=None):
+	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+	path = "/"
+	role_name = context['environment']['openstack.params']['auth']['AWS_ROLE_NAME']
+	#role_name = "SIPadmin"
+	assume_role_policy_doc = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Principal\": { \"AWS\": [ \"arn:aws:iam::042298307144:root\", \"arn:aws:iam::934324332443:root\" ] }, \"Action\": \"sts:AssumeRole\" } ] }"
         response = aws_sip.role_create(aws_access_key_id, aws_access_secret_key, path, role_name, assume_role_policy_doc)
 	print("response: ",response)
 	print("")
@@ -122,30 +173,48 @@ class AWS(wsgi.Application):
     def role_delete(self, context, auth=None):
 	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
 	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
-	role_name = "SIPadmin"
+	role_name = context['environment']['openstack.params']['auth']['AWS_ROLE_NAME']
         response = aws_sip.role_delete(aws_access_key_id, aws_access_secret_key, role_name)
 	print("response: ",response)
 	print("")
         return response
 
     def attach_user_policy(self, context, auth=None):
-        print("%%%%%%%%%%%%%%%%%%% In controller attach_user_policy function. %%%%%%%%%%%%%%%%%%")
 	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
 	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
-	user_name = ""
-	policy_arn = ""
+	user_name = context['environment']['openstack.params']['auth']['AWS_USER_NAME']
+	policy_arn = context['environment']['openstack.params']['auth']['AWS_POLICY_ARN']
         response = aws_sip.attach_user_policy(aws_access_key_id, aws_access_secret_key, user_name, policy_arn)
 	print("response: ",response)
 	print("")
         return response
 
-    def attach_role_policy(self, context, auth=None):
-        print("%%%%%%%%%%%%%%%%%%% In controller attach_role_policy function. %%%%%%%%%%%%%%%%%%")
+    def detach_user_policy(self, context, auth=None):
 	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
 	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
-	role_name = ""
-	policy_arn = ""
-        response = aws_sip.attach_user_policy(aws_access_key_id, aws_access_secret_key, role_name, policy_arn)
+	user_name = context['environment']['openstack.params']['auth']['AWS_USER_NAME']
+	policy_arn = context['environment']['openstack.params']['auth']['AWS_POLICY_ARN']
+        response = aws_sip.detach_user_policy(aws_access_key_id, aws_access_secret_key, user_name, policy_arn)
+	print("response: ",response)
+	print("")
+        return response
+
+    def attach_role_policy(self, context, auth=None):
+	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+	role_name = context['environment']['openstack.params']['auth']['AWS_ROLE_NAME']
+	policy_arn = context['environment']['openstack.params']['auth']['AWS_POLICY_ARN']
+        response = aws_sip.attach_role_policy(aws_access_key_id, aws_access_secret_key, role_name, policy_arn)
+	print("response: ",response)
+	print("")
+        return response
+
+    def detach_role_policy(self, context, auth=None):
+	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+	role_name = context['environment']['openstack.params']['auth']['AWS_ROLE_NAME']
+	policy_arn = context['environment']['openstack.params']['auth']['AWS_POLICY_ARN']
+        response = aws_sip.detach_role_policy(aws_access_key_id, aws_access_secret_key, role_name, policy_arn)
 	print("response: ",response)
 	print("")
         return response

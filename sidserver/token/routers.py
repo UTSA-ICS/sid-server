@@ -11,8 +11,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from sidserver.common import wsgi
-from sidserver.token import controllers
+from keystone.common import wsgi
+from keystone.token import controllers
 
 
 class Router(wsgi.ComposableRouter):
@@ -66,10 +66,41 @@ class Router(wsgi.ComposableRouter):
                        controller=token_controller,
                        action='sip_create',
                        conditions=dict(method=['POST']))
-        mapper.connect('/tokens/aws/create_policy',
+        mapper.connect('/tokens/aws/get_user',
                        controller=token_controller,
-                       action='create_policy',
+                       action='get_user',
                        conditions=dict(method=['POST']))
-
+        mapper.connect('/tokens/aws/get_policy',
+                       controller=token_controller,
+                       action='get_policy',
+                       conditions=dict(method=['POST']))
+        mapper.connect('/tokens/aws/policy_get',
+                       controller=token_controller,
+                       action='policy_get',
+                       conditions=dict(method=['POST']))
+        mapper.connect('/tokens/aws/policy_create',
+                       controller=token_controller,
+                       action='policy_create',
+                       conditions=dict(method=['POST']))
+        mapper.connect('/tokens/aws/policy_delete',
+                       controller=token_controller,
+                       action='policy_delete',
+                       conditions=dict(method=['POST']))
+        mapper.connect('/tokens/aws/role_get',
+                       controller=token_controller,
+                       action='role_get',
+                       conditions=dict(method=['POST']))
+        mapper.connect('/tokens/aws/role_create',
+                       controller=token_controller,
+                       action='role_create',
+                       conditions=dict(method=['POST']))
+        mapper.connect('/tokens/aws/attach_user_policy',
+                       controller=token_controller,
+                       action='attach_user_policy',
+                       conditions=dict(method=['POST']))
+        mapper.connect('/tokens/aws/attach_role_policy',
+                       controller=token_controller,
+                       action='attach_role_policy',
+                       conditions=dict(method=['POST']))
 
 

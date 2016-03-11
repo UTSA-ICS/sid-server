@@ -22,6 +22,25 @@ def get_user(access_key_id, access_secret_key):
     print("")
     return user
 
+def user_create(access_key_id, access_secret_key, path, user_name):
+    client = boto3.client('iam', aws_access_key_id=access_key_id, aws_secret_access_key=access_secret_key)
+    user = client.create_user(Path=path, UserName=user_name)
+    print("")
+    print("The new created user is: ", user)
+    print("")
+    return user
+
+def user_delete(access_key_id, access_secret_key, user_name):
+    client = boto3.client('iam', aws_access_key_id=access_key_id, aws_secret_access_key=access_secret_key)
+    user = client.delete_user(UserName=user_name)
+    return user
+
+def policies_list(access_key_id, access_secret_key, scope, onlyattached, path):
+    client = boto3.client('iam', aws_access_key_id=access_key_id, aws_secret_access_key=access_secret_key)
+    #role = client.list_policies(Scope=scope, OnlyAttached=onlyattached, PathPrefix=path, Marker=marker, MaxItems=123)
+    role = client.list_policies(Scope=scope, OnlyAttached=onlyattached, PathPrefix=path, MaxItems=123)
+    return role
+
 def policy_get(access_key_id, access_secret_key, policy_arn):
     client = boto3.client('iam', aws_access_key_id=access_key_id, aws_secret_access_key=access_secret_key)
     #policy = client.get_policy(PolicyArn='arn:aws:iam::aws:policy/AdministratorAccess')
@@ -35,7 +54,7 @@ def policy_get(access_key_id, access_secret_key, policy_arn):
 def policy_create(access_key_id, access_secret_key, policy_name, policy_doc):
     client = boto3.client('iam', aws_access_key_id=access_key_id, aws_secret_access_key=access_secret_key)
     path='/' 
-    desc=None
+    desc=''
     policy = client.create_policy(PolicyName=policy_name, Path=path, PolicyDocument=policy_doc, Description=desc)
     #policy = client.create_policy(PolicyName='AssumeRoleTest', Path='/', PolicyDocument='', Description='')
     print("")
@@ -47,6 +66,12 @@ def policy_delete(access_key_id, access_secret_key, policy_arn):
     client = boto3.client('iam', aws_access_key_id=access_key_id, aws_secret_access_key=access_secret_key)
     policy = client.delete_policy(PolicyArn=policy_arn)
     return policy
+
+def roles_list(access_key_id, access_secret_key, path):
+    client = boto3.client('iam', aws_access_key_id=access_key_id, aws_secret_access_key=access_secret_key)
+    #role = client.list_roles(PathPrefix=path, Marker=marker, MaxItems=123)
+    role = client.list_roles(PathPrefix=path, MaxItems=123)
+    return role
 
 def role_get(access_key_id, access_secret_key, role_name):
     client = boto3.client('iam', aws_access_key_id=access_key_id, aws_secret_access_key=access_secret_key)
@@ -93,7 +118,7 @@ def detach_role_policy(access_key_id, access_secret_key, role_name, policy_arn):
     client = boto3.client('iam', aws_access_key_id=access_key_id, aws_secret_access_key=access_secret_key)
     response = client.detach_role_policy(RoleName=role_name, PolicyArn=policy_arn)
     print("")
-    print("Policy is attached to a role!")
+    print("Policy is detached from a role!")
     print("")
     return response 
 

@@ -32,9 +32,17 @@ class Router(wsgi.ComposableRouter):
                        controller=aws_controller,
                        action='get_user',
                        conditions=dict(method=['POST']))
-        mapper.connect('/aws/get_policy',
+        mapper.connect('/aws/user_create',
                        controller=aws_controller,
-                       action='get_policy',
+                       action='user_create',
+                       conditions=dict(method=['POST']))
+        mapper.connect('/aws/user_delete',
+                       controller=aws_controller,
+                       action='user_delete',
+                       conditions=dict(method=['POST']))
+        mapper.connect('/aws/policies_list',
+                       controller=aws_controller,
+                       action='policies_list',
                        conditions=dict(method=['POST']))
         mapper.connect('/aws/policy_get',
                        controller=aws_controller,
@@ -48,17 +56,37 @@ class Router(wsgi.ComposableRouter):
                        controller=aws_controller,
                        action='policy_delete',
                        conditions=dict(method=['POST']))
+        mapper.connect('/aws/roles_list',
+                       controller=aws_controller,
+                       action='roles_list',
+                       conditions=dict(method=['POST']))
+        mapper.connect('/aws/role_get',
+                       controller=aws_controller,
+                       action='role_get',
+                       conditions=dict(method=['POST']))
         mapper.connect('/aws/role_create',
                        controller=aws_controller,
                        action='role_create',
+                       conditions=dict(method=['POST']))
+        mapper.connect('/aws/role_delete',
+                       controller=aws_controller,
+                       action='role_delete',
                        conditions=dict(method=['POST']))
         mapper.connect('/aws/attach_user_policy',
                        controller=aws_controller,
                        action='attach_user_policy',
                        conditions=dict(method=['POST']))
+        mapper.connect('/aws/detach_user_policy',
+                       controller=aws_controller,
+                       action='detach_user_policy',
+                       conditions=dict(method=['POST']))
         mapper.connect('/aws/attach_role_policy',
                        controller=aws_controller,
                        action='attach_role_policy',
+                       conditions=dict(method=['POST']))
+        mapper.connect('/aws/detach_role_policy',
+                       controller=aws_controller,
+                       action='detach_role_policy',
                        conditions=dict(method=['POST']))
 
 
