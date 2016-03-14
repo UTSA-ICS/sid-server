@@ -28,9 +28,9 @@ class Router(wsgi.ComposableRouter):
                        controller=aws_controller,
                        action='sip_create',
                        conditions=dict(method=['POST']))
-        mapper.connect('/aws/get_user',
+        mapper.connect('/aws/user_get',
                        controller=aws_controller,
-                       action='get_user',
+                       action='user_get',
                        conditions=dict(method=['POST']))
         mapper.connect('/aws/user_create',
                        controller=aws_controller,

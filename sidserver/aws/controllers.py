@@ -41,6 +41,17 @@ LOG = log.getLogger(__name__)
 
 class AWS(wsgi.Application):
 
+## manually creare a sid for a group of organizations
+## manually create Core Project and Open Project
+## maintain a list of organizations accounts
+## maintain a list of organizations security admin users
+    orgs = {"CPS":"934324332443", "SAWS":"042298307144"}
+    orgs_admins = {"SecAdminCPS":"SecAdminCPS", "SecAdminSAWS":"SecAdminSAWS"}
+## maintain a list of AWS accounts for sip creation
+    working_accounts = ["652714115935"]
+    #sips_accounts = ["652714115935"]
+
+
     # SID
     def login_aws_user(self, context, auth=None):
         print("%%%%%%%%%%%%%%%%%%% In login_aws_user function. %%%%%%%%%%%%%%%%%%")
@@ -59,18 +70,11 @@ class AWS(wsgi.Application):
         #traceback.print_stack()
         return login
 
-    def sip_create(self, context, auth=None):
-        print("%%%%%%%%%%%%%%%%%%%%% In sip_create function. %%%%%%%%%%%%%%%%%%%")
-	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
-	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
-        sip_create = aws_sip.sip_create(aws_access_key_id, aws_access_secret_key)
-        return sip_create
-
-    def get_user(self, context, auth=None):
+    def user_get(self, context, auth=None):
         print("%%%%%%%%%%%%%%%%%%% In controller get_user function. %%%%%%%%%%%%%%%%%%")
 	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
 	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
-        response = aws_sip.get_user(aws_access_key_id, aws_access_secret_key)
+        response = aws_sip.user_get(aws_access_key_id, aws_access_secret_key)
 	print("response: ",response)
 	print("")
         return response
@@ -218,3 +222,36 @@ class AWS(wsgi.Application):
 	print("response: ",response)
 	print("")
         return response
+
+    def sip_create(self, context, auth=None):
+	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+
+        ## verify the user
+        user = aws_sip.user_get(access_key_id, access_secret_key)
+        if (user == ""):
+            print("The user doesn't exist!")
+            return
+
+	## pick up one AWS account for the sip
+	sip_account = working_accounts[0]
+
+	## get sip manager key
+	manager_aws_access_key_id = ""
+	manager_aws_access_secret_key = ""
+
+	## create SIPadmin role and SIPmember role
+	path = "/"
+	role_name = context['environment']['openstack.params']['auth']['AWS_ROLE_NAME']
+	assume_role_policy_doc = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Principal\": { \"AWS\": [ \"arn:aws:iam::042298307144:root\", \"arn:aws:iam::934324332443:root\" ] }, \"Action\": \"sts:AssumeRole\" } ] }"
+        role = aws_sip.role_create(manager_aws_access_key_id, manager_aws_access_secret_key, path, role_name, assume_role_policy_doc)
+
+	## attach policy to SIPadmin/SIPmember role
+	policy_arn = context['environment']['openstack.params']['auth']['AWS_POLICY_ARN']
+        policy = aws_sip.attach_role_policy(manager_aws_access_key_id, manager_aws_access_secret_key, role_name, policy_arn)
+
+        return 
+
+
+
+

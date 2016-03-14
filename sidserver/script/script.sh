@@ -1,5 +1,5 @@
 
-curl -i 'http://10.245.121.24:5000/v2.0/aws/get_user' -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{"auth": {"AWS_ACCESS_KEY_ID":"AKIAIPNDBPV3TDEHSLFQ", "AWS_ACCESS_SECRET_KEY":"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", "AWS_ACCOUNT":"CPS"}}'
+curl -i 'http://10.245.121.24:5000/v2.0/aws/user_get' -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{"auth": {"AWS_ACCESS_KEY_ID":"AKIAIPNDBPV3TDEHSLFQ", "AWS_ACCESS_SECRET_KEY":"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", "AWS_ACCOUNT":"CPS"}}'
 
 curl -i 'http://10.245.121.24:5000/v2.0/aws/user_create' -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{"auth": {"AWS_ACCESS_KEY_ID":"AKIAIPNDBPV3TDEHSLFQ", "AWS_ACCESS_SECRET_KEY":"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", "AWS_ACCOUNT":"CPS", "AWS_USER_NAME":"SecAdmin"}}'
 
@@ -30,5 +30,7 @@ curl -i 'http://10.245.121.24:5000/v2.0/aws/user_delete' -X POST -H "Content-Typ
 curl -i 'http://10.245.121.24:5000/v2.0/aws/attach_role_policy' -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{"auth": {"AWS_ACCESS_KEY_ID":"AKIAIPNDBPV3TDEHSLFQ", "AWS_ACCESS_SECRET_KEY":"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", "AWS_ACCOUNT":"CPS", "AWS_ROLE_NAME":"CPSDummyRole", "AWS_POLICY_ARN":"arn:aws:iam::aws:policy/AmazonEC2FullAccess"}}'
 
 curl -i 'http://10.245.121.24:5000/v2.0/aws/detach_role_policy' -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{"auth": {"AWS_ACCESS_KEY_ID":"AKIAIPNDBPV3TDEHSLFQ", "AWS_ACCESS_SECRET_KEY":"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", "AWS_ACCOUNT":"CPS", "AWS_ROLE_NAME":"CPSDummyRole", "AWS_POLICY_ARN":"arn:aws:iam::aws:policy/AmazonEC2FullAccess"}}'
+
+curl -i 'http://10.245.121.24:5000/v2.0/aws/sip_create' -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{"auth": {"AWS_ACCESS_KEY_ID":"AKIAIPNDBPV3TDEHSLFQ", "AWS_ACCESS_SECRET_KEY":"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", "AWS_ACCOUNT":"CPS", "USER_LIST":("SecAdminCPS", "SecAdminSAWS")}}'
 
 

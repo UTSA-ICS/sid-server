@@ -14,7 +14,7 @@ if __name__ == "__main__":
     aws_login()
 
 
-def get_user(access_key_id, access_secret_key):
+def user_get(access_key_id, access_secret_key):
     client = boto3.client('iam', aws_access_key_id=access_key_id, aws_secret_access_key=access_secret_key)
     user = client.get_user()
     print("")
@@ -121,46 +121,6 @@ def detach_role_policy(access_key_id, access_secret_key, role_name, policy_arn):
     print("Policy is detached from a role!")
     print("")
     return response 
-
-def sip_create(access_key_id, access_secret_key):
-    user = ""
-    user = get_user(access_key_id, access_secret_key)
-    if (user == ""):
-	print("The user doesn't exist!")
-	return
-    ## get sip account and sip manager admin's access key and secret key
-    #sip_account_no="652714115935"
-    #sip_access_key_id="AKIAIWPSDHPRDSGFEGMQ"
-    #sip_access_secret_key= "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"
-    #admin_role = ""
-    #admin_role = create_role(sip_access_key_id, sip_access_secret_key, "SIPadmin")
-    #member_role = create_role(sip_access_key_id, sip_access_secret_key, "SIPmember")
-    policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
-    policy = ""
-    policy = get_policy(access_key_id, access_secret_key, policy_arn)
-    assume_role_policy = ""
-    policy_document = """{
-	  "Version": "2012-10-17",
-	  "Statement": [
-	    {
-	      "Effect": "Allow",
-	      "Principal": {
-  	      "AWS": [
-	          "arn:aws:iam::934324332443:root",
-	          "arn:aws:iam::042298307144:root"
-	        ]
-	      },
-	      "Action": "sts:AssumeRole"
-	    }
-	  ]
-	}
-	"""
-    #assume_role_policy = create_policy(sip_access_key_id, sip_access_secret_key,"AssumeRole", policy_document)
-
-    return user
-
-
-
 
 
 
