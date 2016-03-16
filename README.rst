@@ -39,10 +39,12 @@ To be able to use this service do the following:
 5.) To start the SIDSERVER service run the following commands:
 
     cd /opt/stack; sudo pip install -e sidserver
-    sudo cp /opt/stack/sidserver/apache2/sidserver.conf /etc/apache2/sites-available/.
-    cd /etc/apache2/sites-enbaled;ln -s ../sites-available/sidserver.conf sidserver.conf
-    sudo cp -R /opt/stack/sidserver/apache2/www/sidserver /var/www/.
     
+    sudo cp /opt/stack/sidserver/apache2/sidserver.conf /etc/apache2/sites-available/.
+    
+    cd /etc/apache2/sites-enbaled;ln -s ../sites-available/sidserver.conf sidserver.conf
+    
+    sudo cp -R /opt/stack/sidserver/apache2/www/sidserver /var/www/.
     
     cd /opt/stack/sidserver/bin; ./start_sidserver_screen.sh
 
