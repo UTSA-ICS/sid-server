@@ -42,7 +42,7 @@ To be able to use this service do the following:
     
     sudo cp /opt/stack/sidserver/apache2/sidserver.conf /etc/apache2/sites-available/.
     
-    cd /etc/apache2/sites-enbaled;ln -s ../sites-available/sidserver.conf sidserver.conf
+    cd /etc/apache2/sites-enabled;sudo ln -s ../sites-available/sidserver.conf sidserver.conf
     
     sudo cp -R /opt/stack/sidserver/apache2/www/sidserver /var/www/.
     
