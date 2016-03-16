@@ -22,10 +22,12 @@ if [ -z AWS_ACCESS_KEY_ID ];then AWS_ACCESS_KEY_ID=$3;fi
 if [ -z AWS_ACCESS_SECRET_KEY ];then AWS_ACCESS_SECRET_KEY=$4;fi
 
 AUTH_CREDENTIALS="{ \"auth\": { \"AWS_ACCESS_KEY_ID\":\"$AWS_ACCESS_KEY_ID\", \"AWS_ACCESS_SECRET_KEY\":\"$AWS_ACCESS_SECRET_KEY\", \"AWS_ACCOUNT\":\"$AWS_ACCOUNT\" } }"
-MATCH_PATTERN="grep {.*}"
+MATCH_PATTERN="grep \"{.*}\""
+SID_URL=`echo $OS_AUTH_URL |sed s/:50.*//`":5123/v2.0"
 
 echo ""
-curl -s -i http://10.245.121.24:5000/v2.0/aws/$SID_CMD -X POST  -H "Content-Type: application/json" -H "Accept: application/json" -d "$AUTH_CREDENTIALS" | $MATCH_PATTERN
+CURL_CMD=`curl -s -i $SID_URL/aws/$SID_CMD -X POST  -H "Content-Type: application/json" -H "Accept: application/json" -d "$AUTH_CREDENTIALS"`
+echo $CURL_CMD | grep {.*}
 echo ""
 
 
