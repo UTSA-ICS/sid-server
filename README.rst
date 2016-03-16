@@ -18,7 +18,7 @@ To be able to use this service do the following:
 
 1.) Copy sidserver/etc to /etc/sidserver:
 
-    sudo cp /opt/stack/sidserver/etc/* /etc/sidserver/.
+    sudo cp -R /opt/stack/sidserver/etc/* /etc/sidserver/.
 
 2.) Create a directory called /var/cache/sidserver and give it 777 permission:
 
@@ -34,11 +34,17 @@ To be able to use this service do the following:
     
 4.) Create a service called 'sidserver' in Keystone:
 
-    openstack service create --name "sidserver" --description "SID Server" --enable sidserver
+    openstack service create --name "sidserver" --description "SID Server" sidserver
     
 5.) To start the SIDSERVER service run the following commands:
 
     cd /opt/stack; sudo pip install -e sidserver
+    
+    sudo cp /opt/stack/sidserver/apache2/sidserver.conf /etc/apache2/sites-available/.
+    
+    cd /etc/apache2/sites-enabled;sudo ln -s ../sites-available/sidserver.conf sidserver.conf
+    
+    sudo cp -R /opt/stack/sidserver/apache2/www/sidserver /var/www/.
     
     cd /opt/stack/sidserver/bin; ./start_sidserver_screen.sh
 
