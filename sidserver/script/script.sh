@@ -31,6 +31,7 @@ curl -i 'http://10.245.121.24:5000/v2.0/aws/attach_role_policy' -X POST -H "Cont
 
 curl -i 'http://10.245.121.24:5000/v2.0/aws/detach_role_policy' -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{"auth": {"AWS_ACCESS_KEY_ID":"AKIAIPNDBPV3TDEHSLFQ", "AWS_ACCESS_SECRET_KEY":"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", "AWS_ACCOUNT":"CPS", "AWS_ROLE_NAME":"CPSDummyRole", "AWS_POLICY_ARN":"arn:aws:iam::aws:policy/AmazonEC2FullAccess"}}'
 
-curl -i 'http://10.245.121.24:5000/v2.0/aws/sip_create' -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{"auth": {"AWS_ACCESS_KEY_ID":"AKIAIPNDBPV3TDEHSLFQ", "AWS_ACCESS_SECRET_KEY":"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", "AWS_ACCOUNT":"CPS", "USER_LIST":("SecAdminCPS", "SecAdminSAWS")}}'
+curl -i 'http://10.245.121.24:5000/v2.0/aws/sip_create' -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{"auth": {"AWS_ACCESS_KEY_ID":"AKIAIPNDBPV3TDEHSLFQ", "AWS_ACCESS_SECRET_KEY":"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", "AWS_ACCOUNT":"CPS", "MEMBER_ORGS":["042298307144", "934324332443"], "SecAdmin_USERS":["SecAdminCPS", "SecAdminSAWS"]}}'
+
 
 
