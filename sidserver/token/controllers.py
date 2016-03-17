@@ -24,15 +24,15 @@ from oslo_serialization import jsonutils
 from oslo_utils import timeutils
 import six
 
-from keystone.common import controller
-from keystone.common import dependency
-from keystone.common import wsgi
-from keystone import exception
-from keystone.i18n import _
-from keystone.models import token_model
-from keystone.token import provider
+from sidserver.common import controller
+from sidserver.common import dependency
+from sidserver.common import wsgi
+from sidserver import exception
+from sidserver.i18n import _
+from sidserver.models import token_model
+from sidserver.token import provider
 
-from keystone.aws import aws_sip
+from sidserver.aws import aws_sip
 
 
 CONF = cfg.CONF
