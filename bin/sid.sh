@@ -33,7 +33,16 @@ fi
 
 AUTH_CREDENTIALS="{ \"auth\": { \"AWS_ACCESS_KEY_ID\":\"$AWS_ACCESS_KEY_ID\", \"AWS_ACCESS_SECRET_KEY\":\"$AWS_ACCESS_SECRET_KEY\", \"AWS_ACCOUNT\":\"$AWS_ACCOUNT\" } }"
 MATCH_PATTERN="grep \"{.*}\""
-SID_URL=`echo $OS_AUTH_URL |sed s/:50.*//`":5123/v2.0"
+
+if [ -z $OS_AUTH_URL ];then 
+	echo ""
+	echo "NO Auth URL Set, Please run <source openrc admin admin>"
+	echo "Exiting...."
+	echo ""
+	exit 1
+else
+	SID_URL=`echo $OS_AUTH_URL |sed s/:50.*//`":5123/v2.0"
+fi
 
 echo ""
 CURL_CMD=`curl -s -i $SID_URL/aws/$SID_CMD -X POST  -H "Content-Type: application/json" -H "Accept: application/json" -d "$AUTH_CREDENTIALS"`
