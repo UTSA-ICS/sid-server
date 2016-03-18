@@ -13,23 +13,18 @@
 #    under the License.
 
 import traceback
-
 import datetime
 import sys
+import six
 
-#from keystoneclient.common import cms
 from oslo_config import cfg
 from oslo_log import log
 from oslo_serialization import jsonutils
 from oslo_utils import timeutils
-import six
 
-from sidserver.common import controller
-from sidserver.common import dependency
 from sidserver.common import wsgi
 from sidserver import exception
 from sidserver.i18n import _
-from sidserver.models import token_model
 
 from sidserver.aws import aws_sip
 

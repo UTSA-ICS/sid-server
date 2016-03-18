@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from sidserver.common import json_home
 from sidserver.common import wsgi
 
 
@@ -59,22 +58,3 @@ class Router(wsgi.ComposableRouter):
             action='delete_%s' % self.key,
             conditions=dict(method=['DELETE']))
 
-        # Add the collection resource and entity resource to the resource
-        # descriptions.
-
-        collection_rel = json_home.build_v3_resource_relation(
-            self.collection_key)
-        rel_data = {'href': collection_path, }
-        self._resource_descriptions.append((collection_rel, rel_data))
-
-        if self._is_entity_implemented:
-            entity_rel = json_home.build_v3_resource_relation(self.key)
-            id_str = '%s_id' % self.key
-            id_param_rel = json_home.build_v3_parameter_relation(id_str)
-            entity_rel_data = {
-                'href-template': entity_path,
-                'href-vars': {
-                    id_str: id_param_rel,
-                },
-            }
-            self._resource_descriptions.append((entity_rel, entity_rel_data))

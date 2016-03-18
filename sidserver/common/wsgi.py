@@ -273,10 +273,7 @@ class Application(BaseApplication):
 
     def _get_response_code(self, req):
         req_method = req.environ['REQUEST_METHOD']
-        controller = importutils.import_class('sidserver.common.controller')
         code = None
-        if isinstance(self, controller.V3Controller) and req_method == 'POST':
-            code = (201, 'Created')
         return code
 
     def _normalize_arg(self, arg):

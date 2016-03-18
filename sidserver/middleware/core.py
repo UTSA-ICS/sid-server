@@ -18,7 +18,6 @@ from oslo_middleware import sizelimit
 from oslo_serialization import jsonutils
 import six
 
-from sidserver.common import authorization
 from sidserver.common import wsgi
 from sidserver import exception
 from sidserver.i18n import _LW
@@ -195,46 +194,4 @@ class RequestBodySizeLimiter(sizelimit.RequestBodySizeLimiter):
         super(RequestBodySizeLimiter, self).__init__(*args, **kwargs)
 
 
-class AuthContextMiddleware(wsgi.Middleware):
-    """Build the authentication context from the request auth token."""
 
-    def _build_auth_context(self, request):
-        token_id = request.headers.get(AUTH_TOKEN_HEADER).strip()
-
-        if token_id == CONF.admin_token:
-            # NOTE(gyee): no need to proceed any further as the special admin
-            # token is being handled by AdminTokenAuthMiddleware. This code
-            # will not be impacted even if AdminTokenAuthMiddleware is removed
-            # from the pipeline as "is_admin" is default to "False". This code
-            # is independent of AdminTokenAuthMiddleware.
-            return {}
-
-        context = {'token_id': token_id}
-        context['environment'] = request.environ
-
-        try:
-            token_ref = token_model.KeystoneToken(
-                token_id=token_id,
-                token_data=self.token_provider_api.validate_token(token_id))
-            # TODO(gyee): validate_token_bind should really be its own
-            # middleware
-            wsgi.validate_token_bind(context, token_ref)
-            return authorization.token_to_auth_context(token_ref)
-        except exception.TokenNotFound:
-            LOG.warning(_LW('RBAC: Invalid token'))
-            raise exception.Unauthorized()
-
-    def process_request(self, request):
-        if AUTH_TOKEN_HEADER not in request.headers:
-            LOG.debug(('Auth token not in the request header. '
-                       'Will not build auth context.'))
-            return
-
-        if authorization.AUTH_CONTEXT_ENV in request.environ:
-            msg = _LW('Auth context already exists in the request environment')
-            LOG.warning(msg)
-            return
-
-        auth_context = self._build_auth_context(request)
-        LOG.debug('RBAC: auth_context: %s', auth_context)
-        request.environ[authorization.AUTH_CONTEXT_ENV] = auth_context

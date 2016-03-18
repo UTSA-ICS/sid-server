@@ -21,7 +21,6 @@ from paste import deploy
 import routes
 
 from sidserver.common import wsgi
-from sidserver import policy
 from sidserver import controllers
 from sidserver import routers
 from sidserver import aws
