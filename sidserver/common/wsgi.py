@@ -40,7 +40,6 @@ from sidserver import exception
 from sidserver.i18n import _
 from sidserver.i18n import _LI
 from sidserver.i18n import _LW
-from sidserver.models import token_model
 
 
 CONF = cfg.CONF
@@ -52,61 +51,6 @@ CONTEXT_ENV = 'openstack.context'
 
 # Environment variable used to pass the request params
 PARAMS_ENV = 'openstack.params'
-
-
-def validate_token_bind(context, token_ref):
-    bind_mode = CONF.token.enforce_token_bind
-
-    if bind_mode == 'disabled':
-        return
-
-    if not isinstance(token_ref, token_model.KeystoneToken):
-        raise exception.UnexpectedError(_('token reference must be a '
-                                          'KeystoneToken type, got: %s') %
-                                        type(token_ref))
-    bind = token_ref.bind
-
-    # permissive and strict modes don't require there to be a bind
-    permissive = bind_mode in ('permissive', 'strict')
-
-    # get the named mode if bind_mode is not one of the known
-    name = None if permissive or bind_mode == 'required' else bind_mode
-
-    if not bind:
-        if permissive:
-            # no bind provided and none required
-            return
-        else:
-            LOG.info(_LI("No bind information present in token"))
-            raise exception.Unauthorized()
-
-    if name and name not in bind:
-        LOG.info(_LI("Named bind mode %s not in bind information"), name)
-        raise exception.Unauthorized()
-
-    for bind_type, identifier in six.iteritems(bind):
-        if bind_type == 'kerberos':
-            if not (context['environment'].get('AUTH_TYPE', '').lower()
-                    == 'negotiate'):
-                LOG.info(_LI("Kerberos credentials required and not present"))
-                raise exception.Unauthorized()
-
-            if not context['environment'].get('REMOTE_USER') == identifier:
-                LOG.info(_LI("Kerberos credentials do not match "
-                             "those in bind"))
-                raise exception.Unauthorized()
-
-            LOG.info(_LI("Kerberos bind authentication successful"))
-
-        elif bind_mode == 'permissive':
-            LOG.debug(("Ignoring unknown bind for permissive mode: "
-                       "{%(bind_type)s: %(identifier)s}"),
-                      {'bind_type': bind_type, 'identifier': identifier})
-        else:
-            LOG.info(_LI("Couldn't verify unknown bind: "
-                         "{%(bind_type)s: %(identifier)s}"),
-                     {'bind_type': bind_type, 'identifier': identifier})
-            raise exception.Unauthorized()
 
 
 def best_match_language(req):
@@ -282,35 +226,6 @@ class Application(BaseApplication):
     def _normalize_dict(self, d):
         return {self._normalize_arg(k): v for (k, v) in six.iteritems(d)}
 
-    def assert_admin(self, context):
-        if not context['is_admin']:
-            try:
-                user_token_ref = token_model.KeystoneToken(
-                    token_id=context['token_id'],
-                    token_data=self.token_provider_api.validate_token(
-                        context['token_id']))
-            except exception.TokenNotFound as e:
-                raise exception.Unauthorized(e)
-
-            validate_token_bind(context, user_token_ref)
-            creds = copy.deepcopy(user_token_ref.metadata)
-
-            try:
-                creds['user_id'] = user_token_ref.user_id
-            except exception.UnexpectedError:
-                LOG.debug('Invalid user')
-                raise exception.Unauthorized()
-
-            if user_token_ref.project_scoped:
-                creds['tenant_id'] = user_token_ref.project_id
-            else:
-                LOG.debug('Invalid tenant')
-                raise exception.Unauthorized()
-
-            creds['roles'] = user_token_ref.role_names
-            # Accept either is_admin or the admin role
-            self.policy_api.enforce(creds, 'admin_required', {})
-
     def _attribute_is_empty(self, ref, attribute):
         """Returns true if the attribute in the given ref (which is a
         dict) is empty or None.
@@ -337,29 +252,6 @@ class Application(BaseApplication):
         if missing_attrs:
             msg = _('%s field(s) cannot be empty') % ', '.join(missing_attrs)
             raise exception.ValidationError(message=msg)
-
-    def _get_trust_id_for_request(self, context):
-        """Get the trust_id for a call.
-
-        Retrieve the trust_id from the token
-        Returns None if token is not trust scoped
-        """
-        if ('token_id' not in context or
-                context.get('token_id') == CONF.admin_token):
-            LOG.debug(('will not lookup trust as the request auth token is '
-                       'either absent or it is the system admin token'))
-            return None
-
-        try:
-            token_data = self.token_provider_api.validate_token(
-                context['token_id'])
-        except exception.TokenNotFound:
-            LOG.warning(_LW('Invalid token in _get_trust_id_for_request'))
-            raise exception.Unauthorized()
-
-        token_ref = token_model.KeystoneToken(token_id=context['token_id'],
-                                              token_data=token_data)
-        return token_ref.trust_id
 
     @classmethod
     def base_url(cls, context, endpoint_type):

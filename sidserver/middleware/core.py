@@ -21,7 +21,6 @@ import six
 from sidserver.common import wsgi
 from sidserver import exception
 from sidserver.i18n import _LW
-from sidserver.models import token_model
 from sidserver.openstack.common import versionutils
 
 CONF = cfg.CONF
