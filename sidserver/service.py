@@ -20,19 +20,11 @@ from oslo_log import log
 from paste import deploy
 import routes
 
-from sidserver import assignment
-from sidserver import auth
-from sidserver import catalog
 from sidserver.common import wsgi
-from sidserver import controllers
-from sidserver import credential
-from sidserver import identity
 from sidserver import policy
-from sidserver import resource
+from sidserver import controllers
 from sidserver import routers
-from sidserver import token
 from sidserver import aws
-from sidserver import trust
 
 
 CONF = cfg.CONF
@@ -67,9 +59,7 @@ def fail_gracefully(f):
 def public_app_factory(global_conf, **local_conf):
     controllers.register_version('v2.0')
     return wsgi.ComposingRouter(routes.Mapper(),
-                                [assignment.routers.Public(),
-                                 token.routers.Router(),
-                                 aws.routers.Router(),
+                                [aws.routers.Router(),
                                  routers.VersionV2('public'),
                                  routers.Extension(False)])
 
@@ -78,13 +68,9 @@ def public_app_factory(global_conf, **local_conf):
 def admin_app_factory(global_conf, **local_conf):
     controllers.register_version('v2.0')
     return wsgi.ComposingRouter(routes.Mapper(),
-                                [identity.routers.Admin(),
-                                 assignment.routers.Admin(),
-                                    token.routers.Router(),
-                                    aws.routers.Router(),
-                                    resource.routers.Admin(),
-                                    routers.VersionV2('admin'),
-                                    routers.Extension()])
+                                [aws.routers.Router(),
+                                 routers.VersionV2('admin'),
+                                 routers.Extension()])
 
 
 @fail_gracefully
@@ -98,24 +84,3 @@ def admin_version_app_factory(global_conf, **local_conf):
     return wsgi.ComposingRouter(routes.Mapper(),
                                 [routers.Versions('admin')])
 
-
-@fail_gracefully
-def v3_app_factory(global_conf, **local_conf):
-    controllers.register_version('v3')
-    mapper = routes.Mapper()
-    sub_routers = []
-    _routers = []
-
-    router_modules = [assignment, auth, catalog, credential, identity, policy,
-                      resource]
-    if CONF.trust.enabled:
-        router_modules.append(trust)
-
-    for module in router_modules:
-        routers_instance = module.routers.Routers()
-        _routers.append(routers_instance)
-        routers_instance.append_v3_routers(mapper, sub_routers)
-
-    # Add in the v3 version api
-    sub_routers.append(routers.VersionV3('public', _routers))
-    return wsgi.ComposingRouter(mapper, sub_routers)

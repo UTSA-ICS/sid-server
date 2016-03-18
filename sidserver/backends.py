@@ -10,21 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from sidserver import assignment
-from sidserver import auth
-from sidserver import catalog
 from sidserver.common import cache
-from sidserver.contrib import endpoint_filter
-from sidserver.contrib import endpoint_policy
-from sidserver.contrib import federation
-from sidserver.contrib import oauth1
-from sidserver.contrib import revoke
-from sidserver import credential
-from sidserver import identity
-from sidserver import policy
-from sidserver import resource
-from sidserver import token
-from sidserver import trust
 
 
 def load_backends():
@@ -36,29 +22,7 @@ def load_backends():
     # and that the assignment driver is created before the resource manager.
     # The default resource driver depends on assignment, which in turn
     # depends on identity - hence we need to ensure the chain is available.
-    _IDENTITY_API = identity.Manager()
-    _ASSIGNMENT_API = assignment.Manager()
 
-    DRIVERS = dict(
-        assignment_api=_ASSIGNMENT_API,
-        catalog_api=catalog.Manager(),
-        credential_api=credential.Manager(),
-        domain_config_api=resource.DomainConfigManager(),
-        endpoint_filter_api=endpoint_filter.Manager(),
-        endpoint_policy_api=endpoint_policy.Manager(),
-        federation_api=federation.Manager(),
-        id_generator_api=identity.generator.Manager(),
-        id_mapping_api=identity.MappingManager(),
-        identity_api=_IDENTITY_API,
-        oauth_api=oauth1.Manager(),
-        policy_api=policy.Manager(),
-        resource_api=resource.Manager(),
-        revoke_api=revoke.Manager(),
-        role_api=assignment.RoleManager(),
-        token_api=token.persistence.Manager(),
-        trust_api=trust.Manager(),
-        token_provider_api=token.provider.Manager())
-
-    auth.controllers.load_auth_methods()
+    DRIVERS = dict( )
 
     return DRIVERS

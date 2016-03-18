@@ -30,7 +30,6 @@ from sidserver.common import wsgi
 from sidserver import exception
 from sidserver.i18n import _
 from sidserver.models import token_model
-from sidserver.token import provider
 
 from sidserver.aws import aws_sip
 
