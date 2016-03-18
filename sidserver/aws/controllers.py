@@ -40,15 +40,14 @@ LOG = log.getLogger(__name__)
 
 class AWS(wsgi.Application):
 
-## manually creare a sid for a group of organizations
-## manually create Core Project and Open Project
-## maintain a list of organizations accounts
-## maintain a list of organizations security admin users
+    ## manually creare a sid for a group of organizations
+    ## manually create Core Project and Open Project
+    ## maintain a list of organizations accounts
+    ## maintain a list of organizations security admin users
     orgs = {"CPS":"934324332443", "SAWS":"042298307144"}
     orgs_admins = {"SecAdminCPS":"SecAdminCPS", "SecAdminSAWS":"SecAdminSAWS"}
-## maintain a list of AWS accounts for sip creation
-    working_accounts = ["652714115935"]
-    #sips_accounts = ["652714115935"]
+    ## maintain a list of AWS accounts for sip creation
+    sips_accounts = {"SIP1":{"AWS_ACCOUNT_NO":"652714115935", "SIP_MANAGER":{"AWS_ACCESS_KEY_ID":"AKIAJD7U6ZQK5LKB2XQQ", "AWS_ACCESS_SECRET_KEY":"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"}}, "SIP2":{"AWS_ACCOUNT_NO":"401991328752", "SIP_MANAGER":{"AWS_ACCESS_KEY_ID":"AKIAJOSJHXHCNBVWSGMA", "AWS_ACCESS_SECRET_KEY":"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"}}}
 
 
     # SID
@@ -225,28 +224,42 @@ class AWS(wsgi.Application):
     def sip_create(self, context, auth=None):
 	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
 	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
-
+	member_orgs = context['environment']['openstack.params']['auth']['MEMBER_ORGS']
+	    
         ## verify the user
-        user = aws_sip.user_get(access_key_id, access_secret_key)
+        user = aws_sip.user_get(aws_access_key_id, aws_access_secret_key)
         if (user == ""):
             print("The user doesn't exist!")
             return
 
 	## pick up one AWS account for the sip
-	sip_account = working_accounts[0]
+	sip_account_no = self.sips_accounts['SIP1']['AWS_ACCOUNT_NO']
 
 	## get sip manager key
-	manager_aws_access_key_id = ""
-	manager_aws_access_secret_key = ""
+	manager_aws_access_key_id = self.sips_accounts['SIP1']['SIP_MANAGER']['AWS_ACCESS_KEY_ID']
+	manager_aws_access_secret_key = self.sips_accounts['SIP1']['SIP_MANAGER']['AWS_ACCESS_SECRET_KEY']
 
 	## create SIPadmin role and SIPmember role
 	path = "/"
-	role_name = context['environment']['openstack.params']['auth']['AWS_ROLE_NAME']
-	assume_role_policy_doc = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Principal\": { \"AWS\": [ \"arn:aws:iam::042298307144:root\", \"arn:aws:iam::934324332443:root\" ] }, \"Action\": \"sts:AssumeRole\" } ] }"
+	role_name = "SIPadmin"
+	#assume_role_policy_doc = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Principal\": { \"AWS\": [ \"arn:aws:iam::042298307144:root\", \"arn:aws:iam::934324332443:root\" ] }, \"Action\": \"sts:AssumeRole\" } ] }"
+	assume_role_policy_str_ini = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Principal\": { \"AWS\": [  "
+	assume_role_policy_str_tai = " ] }, \"Action\": \"sts:AssumeRole\" } ] }"
+	assume_role_policy_str = ""
+	cnt = 0
+	for index in range(len(member_orgs)-1):
+	    assume_role_policy_str = assume_role_policy_str + "\"arn:aws:iam::" + member_orgs[index] + ":root\", "  
+	    cnt = cnt + 1
+	#print("index=", index)
+	#print("cnt=", cnt)
+	assume_role_policy_str = assume_role_policy_str + "\"arn:aws:iam::" + member_orgs[cnt] + ":root\""
+	assume_role_policy_doc = assume_role_policy_str_ini + assume_role_policy_str + assume_role_policy_str_tai
+	print("assume_role_policy_doc = ", assume_role_policy_doc)
+
         role = aws_sip.role_create(manager_aws_access_key_id, manager_aws_access_secret_key, path, role_name, assume_role_policy_doc)
 
 	## attach policy to SIPadmin/SIPmember role
-	policy_arn = context['environment']['openstack.params']['auth']['AWS_POLICY_ARN']
+	policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
         policy = aws_sip.attach_role_policy(manager_aws_access_key_id, manager_aws_access_secret_key, role_name, policy_arn)
 
         return 

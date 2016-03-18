@@ -24,10 +24,6 @@ class Router(wsgi.ComposableRouter):
                        controller=aws_controller,
                        action='login_aws_user',
                        conditions=dict(method=['POST']))
-        mapper.connect('/aws/create_sip',
-                       controller=aws_controller,
-                       action='sip_create',
-                       conditions=dict(method=['POST']))
         mapper.connect('/aws/user_get',
                        controller=aws_controller,
                        action='user_get',
@@ -87,6 +83,10 @@ class Router(wsgi.ComposableRouter):
         mapper.connect('/aws/detach_role_policy',
                        controller=aws_controller,
                        action='detach_role_policy',
+                       conditions=dict(method=['POST']))
+        mapper.connect('/aws/sip_create',
+                       controller=aws_controller,
+                       action='sip_create',
                        conditions=dict(method=['POST']))
 
 
