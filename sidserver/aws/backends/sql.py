@@ -14,66 +14,56 @@
 
 from sidserver.common import sql
 from sidserver import exception
-#from sidserver.policy.backends import rules
 
 
-class PolicyModel(sql.ModelBase, sql.DictBase):
-    __tablename__ = 'policy'
-    attributes = ['id', 'blob', 'type']
+class SIPModel(sql.ModelBase, sql.DictBase):
+    __tablename__ = 'sip_accounts'
+    attributes = ['id', 'account_info', 'status']
     id = sql.Column(sql.String(64), primary_key=True)
-    blob = sql.Column(sql.JsonBlob(), nullable=False)
-    type = sql.Column(sql.String(255), nullable=False)
-    extra = sql.Column(sql.JsonBlob())
+    account_info = sql.Column(sql.String(), nullable=False)
+    status = sql.Column(sql.String(64), nullable=False)
+    
 
 
-class Policy(rules.Policy):
+class SIPs():
 
-    @sql.handle_conflicts(conflict_type='policy')
-    def create_policy(self, policy_id, policy):
+    @sql.handle_conflicts(conflict_type='sip')
+    def add_sip(self, sip):
         session = sql.get_session()
 
         with session.begin():
-            ref = PolicyModel.from_dict(policy)
+            ref = SIPModel.from_dict(sip)
             session.add(ref)
 
         return ref.to_dict()
 
-    def list_policies(self):
+    def list_sips(self):
         session = sql.get_session()
-
-        refs = session.query(PolicyModel).all()
+        query = session.query(SIPModel)
+	refs = query.filter_by(status="Available").all()
         return [ref.to_dict() for ref in refs]
 
-    def _get_policy(self, session, policy_id):
-        """Private method to get a policy model object (NOT a dictionary)."""
-        ref = session.query(PolicyModel).get(policy_id)
+    def _get_sip(self, session, sip_id):
+        """Private method to get a sip model object (NOT a dictionary)."""
+        ref = session.query(SipInfo).get(sip_id)
         if not ref:
-            raise exception.PolicyNotFound(policy_id=policy_id)
+            raise exception.NotFound(target=sip)
         return ref
 
-    def get_policy(self, policy_id):
-        session = sql.get_session()
-
-        return self._get_policy(session, policy_id).to_dict()
-
-    @sql.handle_conflicts(conflict_type='policy')
-    def update_policy(self, policy_id, policy):
+    @sql.handle_conflicts(conflict_type='sip')
+    def update_sip(self, sip, status):
         session = sql.get_session()
 
         with session.begin():
-            ref = self._get_policy(session, policy_id)
-            old_dict = ref.to_dict()
-            old_dict.update(policy)
-            new_policy = PolicyModel.from_dict(old_dict)
-            ref.blob = new_policy.blob
-            ref.type = new_policy.type
-            ref.extra = new_policy.extra
+            ref = self._get_sip(session, sip)
+            ref.status = status
 
         return ref.to_dict()
 
-    def delete_policy(self, policy_id):
+    def delete_sip(self, sip_id):
         session = sql.get_session()
 
         with session.begin():
-            ref = self._get_policy(session, policy_id)
+            ref = self._get_sip(session, sip_id)
             session.delete(ref)
+

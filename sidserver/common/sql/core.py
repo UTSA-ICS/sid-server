@@ -125,8 +125,8 @@ class DictBase(models.ModelBase):
     def from_dict(cls, d):
         new_d = d.copy()
 
-        new_d['extra'] = {k: new_d.pop(k) for k in six.iterkeys(d)
-                          if k not in cls.attributes and k != 'extra'}
+        #new_d['extra'] = {k: new_d.pop(k) for k in six.iterkeys(d)
+        #                  if k not in cls.attributes and k != 'extra'}
 
         return cls(**new_d)
 
@@ -138,7 +138,8 @@ class DictBase(models.ModelBase):
         with a broken implementation.
 
         """
-        d = self.extra.copy()
+        #d = self.extra.copy()
+        d = {}
         for attr in self.__class__.attributes:
             d[attr] = getattr(self, attr)
 

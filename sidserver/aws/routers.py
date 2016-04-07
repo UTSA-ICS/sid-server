@@ -88,5 +88,9 @@ class Router(wsgi.ComposableRouter):
                        controller=aws_controller,
                        action='sip_create',
                        conditions=dict(method=['POST']))
+        mapper.connect('/aws/sip_list',
+                       controller=aws_controller,
+                       action='sip_list',
+                       conditions=dict(method=['POST']))
 
 

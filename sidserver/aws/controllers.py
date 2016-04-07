@@ -27,6 +27,7 @@ from sidserver import exception
 from sidserver.i18n import _
 
 from sidserver.aws import aws_sip
+from sidserver.aws.backends import sql
 
 
 CONF = cfg.CONF
@@ -35,6 +36,9 @@ LOG = log.getLogger(__name__)
 
 class AWS(wsgi.Application):
 
+    def __init__(self):
+        self.Mysip = sql.SIPs()
+
     ## manually creare a sid for a group of organizations
     ## manually create Core Project and Open Project
     ## maintain a list of organizations accounts
@@ -42,7 +46,8 @@ class AWS(wsgi.Application):
     orgs = {"CPS":"934324332443", "SAWS":"042298307144"}
     orgs_admins = {"SecAdminCPS":"SecAdminCPS", "SecAdminSAWS":"SecAdminSAWS"}
     ## maintain a list of AWS accounts for sip creation
-    sips_accounts = {"SIP1":{"AWS_ACCOUNT_NO":"652714115935", "SIP_MANAGER":{"AWS_ACCESS_KEY_ID":"AKIAJD7U6ZQK5LKB2XQQ", "AWS_ACCESS_SECRET_KEY":"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"}}, "SIP2":{"AWS_ACCOUNT_NO":"401991328752", "SIP_MANAGER":{"AWS_ACCESS_KEY_ID":"AKIAJOSJHXHCNBVWSGMA", "AWS_ACCESS_SECRET_KEY":"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"}}}
+    #sips_accounts = {"SIP1":{"AWS_ACCOUNT_NO":"652714115935", "SIP_MANAGER":{"AWS_ACCESS_KEY_ID":"AKIAJD7U6ZQK5LKB2XQQ", "AWS_ACCESS_SECRET_KEY":"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"}}, "SIP2":{"AWS_ACCOUNT_NO":"401991328752", "SIP_MANAGER":{"AWS_ACCESS_KEY_ID":"AKIAJOSJHXHCNBVWSGMA", "AWS_ACCESS_SECRET_KEY":"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"}}}
+    sips_accounts = {"Available":{"AWS_ACCOUNT_NO":["652714115935", "401991328752"]}, "Unavailable":{"AWS_ACCOUNT_NO":""}}
 
 
     # SID
@@ -228,11 +233,16 @@ class AWS(wsgi.Application):
             return
 
 	## pick up one AWS account for the sip
-	sip_account_no = self.sips_accounts['SIP1']['AWS_ACCOUNT_NO']
+	print("before!self.sips_accounts=", self.sips_accounts)	
+	sip_account_no = self.sips_accounts['Available']['AWS_ACCOUNT_NO'][0]
+        #sips_accounts = {"Available":{"AWS_ACCOUNT_NO":["652714115935", "401991328752"]}, "Unavailable":{"AWS_ACCOUNT_NO":""}}
+        self.sips_accounts['Available']['AWS_ACCOUNT_NO'][0] = ''
+        self.sips_accounts['Unavailable']['AWS_ACCOUNT_NO'][0] = sip_account_no
+	print("after!self.sips_accounts=", self.sips_accounts)	
 
 	## get sip manager key
-	manager_aws_access_key_id = self.sips_accounts['SIP1']['SIP_MANAGER']['AWS_ACCESS_KEY_ID']
-	manager_aws_access_secret_key = self.sips_accounts['SIP1']['SIP_MANAGER']['AWS_ACCESS_SECRET_KEY']
+	#manager_aws_access_key_id = self.sips_accounts['SIP1']['SIP_MANAGER']['AWS_ACCESS_KEY_ID']
+	#manager_aws_access_secret_key = self.sips_accounts['SIP1']['SIP_MANAGER']['AWS_ACCESS_SECRET_KEY']
 
 	## create SIPadmin role and SIPmember role
 	path = "/"
@@ -260,5 +270,23 @@ class AWS(wsgi.Application):
         return 
 
 
+    def sip_list(self, context):
+	mysip = sql.SIPs()
+        accounts = mysip.list_sips()
+        return accounts
 
+    def add_sip(self, sip):
+        ret = self.Mysip.add_sip(sip)
+        return ret
+
+    def get_sip(self, sip_id):
+        return self.Mysip._get_sip(sip_id)
+
+    def update_sip(self, sip_id, sip):
+        return self.Mysip.update_sip(sip_id, sip)
+
+    def delete_sip(self, sip_id):
+        return self.Mysip.delete_sipinfo(sip_id)
+
+    # end of sip part 
 
