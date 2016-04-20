@@ -88,9 +88,32 @@ class Router(wsgi.ComposableRouter):
                        controller=aws_controller,
                        action='sip_create',
                        conditions=dict(method=['POST']))
+        mapper.connect('/aws/sip_delete',
+                       controller=aws_controller,
+                       action='sip_delete',
+                       conditions=dict(method=['POST']))
         mapper.connect('/aws/sip_list',
                        controller=aws_controller,
                        action='sip_list',
                        conditions=dict(method=['POST']))
-
+        mapper.connect('/aws/list_available_sips',
+                       controller=aws_controller,
+                       action='list_available_sips',
+                       conditions=dict(method=['POST']))
+        mapper.connect('/aws/sid_create',
+                       controller=aws_controller,
+                       action='sid_create',
+                       conditions=dict(method=['POST']))
+        mapper.connect('/aws/sid_delete',
+                       controller=aws_controller,
+                       action='sid_delete',
+                       conditions=dict(method=['POST']))
+        mapper.connect('/aws/sid_get',
+                       controller=aws_controller,
+                       action='sid_get',
+                       conditions=dict(method=['POST']))
+        mapper.connect('/aws/sip_get',
+                       controller=aws_controller,
+                       action='sip_get',
+                       conditions=dict(method=['POST']))
 

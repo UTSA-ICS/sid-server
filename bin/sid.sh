@@ -46,6 +46,8 @@ fi
 
 echo ""
 CURL_CMD=`curl -s -i $SID_URL/aws/$SID_CMD -X POST  -H "Content-Type: application/json" -H "Accept: application/json" -d "$AUTH_CREDENTIALS"`
+# For Debugging
+#echo $CURL_CMD
 echo $CURL_CMD | grep {.*}
 echo ""
 
