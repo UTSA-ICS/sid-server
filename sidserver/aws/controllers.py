@@ -242,34 +242,33 @@ class AWS(wsgi.Application):
 		print("")
 		print("Organization " + org + " doesn't belong to the SID")
 		print("")
-		raise exception.NotFound(target=org)
 	#print("member_orgs=", member_orgs)
 	#print("members_in_sid=", members_in_sid)
 	#print("flag=", flag)
 
         ## verify the sec_admin user
-        #user = aws_sip.user_get(aws_access_key_id, aws_access_secret_key)
-        #if (user == ""):
-        #    print("The user doesn't exist!")
-        #    return
+        user = aws_sip.user_get(aws_access_key_id, aws_access_secret_key)
+        if (user == ""):
+            print("The user doesn't exist!")
+            return
 
 	## get sec_admin org account number and sec_admin user name
 	## e.g.: User ARN: arn:aws:iam::934324332443:user/SecAdmin
-	#sec_admin_name = user['User']['UserName']
-	#sec_admin_arn = user['User']['Arn']
-	#org_account_no = sec_admin_arn[13:24]
-	#print("")	
-	#print("sec_admin_name=", sec_admin_name)
-	#print("sec_admin_arn=", sec_admin_arn)
-	#print("org_account_no=", org_account_no)
-	#print("")	
+	sec_admin_name = user['User']['UserName']
+	sec_admin_arn = user['User']['Arn']
+	org_account_no = sec_admin_arn[13:24]
+	print("")	
+	print("sec_admin_name=", sec_admin_name)
+	print("sec_admin_arn=", sec_admin_arn)
+	print("org_account_no=", org_account_no)
+	print("")	
 
 	## pick up one available AWS account for the sip
 	sip_account_id = self.get_one_available_sip()
 	sip = {}
 	sip['status'] = "1"
 	sip['sip_members'] = member_orgs
-	sip['account_id'] = sip_account_id
+	sip['sip_account_id'] = sip_account_id
 	sip['account_name'] = sip_name
 	sip['sid_id'] = sid_id
 	print("")	
@@ -283,42 +282,49 @@ class AWS(wsgi.Application):
 	manager_aws_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
 	manager_aws_access_secret_key = "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"
 
-	## create SIPadmin role and SIPmember role for organizations
+	## create SIPadmin/SIPmember roles for organizations in the Sip
+	## e.g. role name is like SIPadminXXX/SIPmemberXXX, XXX is org name
 	path = "/"
-	role_name = "SIPadmin" + org_name
-	##assume_role_policy_doc = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Principal\": { \"AWS\": [ \"arn:aws:iam::042298307144:root\", \"arn:aws:iam::934324332443:root\" ] }, \"Action\": \"sts:AssumeRole\" } ] }"
-	##assume_role_policy_str_ini = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Principal\": { \"AWS\": [  "
-	##assume_role_policy_str_tai = " ] }, \"Action\": \"sts:AssumeRole\" } ] }"
-	##assume_role_policy_str = ""
-	##cnt = 0
-	##for index in range(len(member_orgs)-1):
-	##    assume_role_policy_str = assume_role_policy_str + "\"arn:aws:iam::" + member_orgs[index] + ":root\", "  
-	##    cnt = cnt + 1
-	##print("index=", index)
-	##print("cnt=", cnt)
-	##assume_role_policy_str = assume_role_policy_str + "\"arn:aws:iam::" + member_orgs[cnt] + ":root\""
-	#assume_role_policy_str_ini = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Principal\": { \"AWS\":   "
-	#assume_role_policy_str_tai = "  }, \"Action\": \"sts:AssumeRole\" } ] }"
-	#assume_role_policy_str = "\"arn:aws:iam::"+ org_account_no + ":user/" + sec_admin_name + "\""
-	#assume_role_policy_doc = assume_role_policy_str_ini + assume_role_policy_str + assume_role_policy_str_tai
-	#print("assume_role_policy_doc = ", assume_role_policy_doc)
+	for org in member_orgs:
+	    ## SIPadminXXX roles:
+	    role_name = "SIPadmin" + org
+	    assume_role_policy_doc = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::" + member_orgs[org] + ":user/SecAdmin\" }, \"Action\": \"sts:AssumeRole\" } ] }"
+	    print("assume_role_policy_doc = ", assume_role_policy_doc)
+            role = aws_sip.role_create(manager_aws_access_key_id, manager_aws_access_secret_key, path, role_name, assume_role_policy_doc)
 
-        ##role = aws_sip.role_create(manager_aws_access_key_id, manager_aws_access_secret_key, path, role_name, assume_role_policy_doc)
+	    ## create policies for SIPadmin roles
+	    policy_name = "SIPadmin" + org
+	    policy_doc = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Sid\": \"AllowCPSSecAdminToUpdateAssumeRolePolicy\", \"Effect\": \"Allow\", \"Action\": [ \"iam:UpdateAssumeRolePolicy\", \"iam:GetRole\" ], \"Resource\": [ \"arn:aws:iam::" + sip_account_id + ":role/SIPmember" + org + "\" ] }, { \"Sid\": \"AllowCPSSecAdminToListUsers\", \"Effect\": \"Allow\", \"Action\": [ \"iam:ListUsers\" ], \"Resource\": [ \"arn:aws:iam::" + sip_account_id + ":user/\" ] }, { \"Sid\": \"AllowCPSSecAdminToListRoles\", \"Effect\": \"Allow\", \"Action\": [ \"iam:ListRoles\" ], \"Resource\": [ \"arn:aws:iam::" + sip_account_id + ":role/\" ] } ] }"
+	    role_policy = aws_sip.policy_create(manager_aws_access_key_id, manager_aws_access_secret_key,policy_name, policy_doc)
+	    print("SIPadmin role policy:", role_policy)
+	    ## attach policy to SIPadmin roles
+	    policy_arn = role_policy['Policy']['Arn']
+            aws_sip.attach_role_policy(manager_aws_access_key_id, manager_aws_access_secret_key, role_name, policy_arn)
 
-	## attach policy to SIPadmin/SIPmember role
-	##policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
-        ##policy = aws_sip.attach_role_policy(manager_aws_access_key_id, manager_aws_access_secret_key, role_name, policy_arn)
+	    ## SIPmemberXXX roles:
+	    role_name2 = "SIPmember" + org
+	    assume_role_policy_doc2 = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::" + member_orgs[org] + ":root\" }, \"Action\": \"sts:AssumeRole\" } ] }"
+	    print("assume_role_policy_doc2 = ", assume_role_policy_doc2)
+            role2 = aws_sip.role_create(manager_aws_access_key_id, manager_aws_access_secret_key, path, role_name2, assume_role_policy_doc2)
 
+	    ## create policies for SIPmember roles
+	    policy_name2 = "SIPmember" + org
+	    policy_doc2 = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Action\": \"s3:*\", \"Resource\": \"*\" } ] }"
+	    role_policy2 = aws_sip.policy_create(manager_aws_access_key_id, manager_aws_access_secret_key,policy_name2, policy_doc2)
+	    print("SIPmember role policy:", role_policy2)
+	    ## attach policy to SIPadmin roles
+	    policy_arn2 = role_policy2['Policy']['Arn']
+            aws_sip.attach_role_policy(manager_aws_access_key_id, manager_aws_access_secret_key, role_name2, policy_arn2)
         return 
 
     def sip_delete(self, context, auth=None):
 	#member_orgs = context['environment']['openstack.params']['auth']['MEMBER_ORGS']
-	sip_account_id = context['environment']['openstack.params']['auth']['SIP_ID']
+	sip_account_id = context['environment']['openstack.params']['auth']['SIP_ACCOUNT_ID']
 	## get the sip 
 	sip = {}
 	sip['status'] = "0"
 	sip['sip_members'] = ""
-	sip['account_id'] = sip_account_id
+	sip['sip_account_id'] = sip_account_id
 	sip['account_name'] = ""
 	print("")	
 	print("sip=", sip)	
@@ -328,8 +334,8 @@ class AWS(wsgi.Application):
 	return ref
 
     def sip_get(self, context, auth=None):
-	sip_id = context['environment']['openstack.params']['auth']['SIP_ID']
-	sip = self.get_sip(sip_id)
+	sip_account_id = context['environment']['openstack.params']['auth']['SIP_ACCOUNT_ID']
+	sip = self.get_sip(sip_account_id)
 	print("")	
 	print("sip=", sip)	
 	print("")	
@@ -370,12 +376,12 @@ class AWS(wsgi.Application):
 	for element in accounts:
 	    if element['status'] == "0":
 		available_account = element
-		available_account_id = element['account_id']
+		available_sip_account_id = element['sip_account_id']
 		break
 	    print("current account:", element)
 	print("available_account:", available_account)
-	print("available_account_id:", available_account_id)
-	return available_account_id
+	print("available_sip_account_id:", available_sip_account_id)
+	return available_sip_account_id
 
     def update_sip(self, sip_account_id, sip):
         return self.Mysip.update_sip(sip_account_id, sip)
@@ -400,7 +406,7 @@ class AWS(wsgi.Application):
         ret = self.Mysip.get_sip(sip_account_id)
         return ret
 
-    def delete_sip(self, sip_id):
+    def delete_sip(self, sip_account_id):
         return self.Mysip.delete_sip(sip_account_id)
 
     # end of sip part 

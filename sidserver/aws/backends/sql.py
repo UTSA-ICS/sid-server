@@ -18,11 +18,12 @@ from sidserver import exception
 
 class SIPModel(sql.ModelBase, sql.DictBase):
     __tablename__ = 'SIPs'
-    attributes = ['account_id', 'account_name', 'sip_members', 'status']
-    account_id = sql.Column(sql.String(64), primary_key=True)
+    attributes = ['sip_account_id', 'account_name', 'sip_members', 'status']
+    sip_account_id = sql.Column(sql.String(64), primary_key=True)
     account_name = sql.Column(sql.String(64), nullable=True)
     sip_members = sql.Column(sql.JsonBlob(), nullable=True)
     status = sql.Column(sql.String(1), nullable=True)
+    sid_id = sql.Column(sql.String(32), nullable=True)
     
 class SIDModel(sql.ModelBase, sql.DictBase):
     __tablename__ = 'SIDs'
@@ -56,11 +57,11 @@ class SIPs():
 	refs = session.query(SIPModel).filter_by(status="0").all()
         return [ref.to_dict() for ref in refs]
 
-    def get_sip(self, sip_id):
+    def get_sip(self, sip_account_id):
         session = sql.get_session()
-        ref = session.query(SIPModel).get(sip_id)
+        ref = session.query(SIPModel).get(sip_account_id)
         if not ref:
-            raise exception.NotFound(target=sip_id)
+            raise exception.NotFound(target=sip_account_id)
         return ref.to_dict()
 
     @sql.handle_conflicts(conflict_type='sip')
