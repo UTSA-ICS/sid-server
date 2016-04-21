@@ -239,8 +239,13 @@ class AWS(wsgi.Application):
 	for org in member_orgs:
 	    if org not in members_in_sid:
 		flag = 1
-	print("Organization" + org + "doesn't belong to the SID")
-	print("flag=", flag)
+		print("")
+		print("Organization " + org + " doesn't belong to the SID")
+		print("")
+		raise exception.NotFound(target=org)
+	#print("member_orgs=", member_orgs)
+	#print("members_in_sid=", members_in_sid)
+	#print("flag=", flag)
 
         ## verify the sec_admin user
         #user = aws_sip.user_get(aws_access_key_id, aws_access_secret_key)
@@ -271,8 +276,8 @@ class AWS(wsgi.Application):
 	print("sip=", sip)	
 	print("")	
 
-	## update the sip account
-	#ref = self.update_sip(sip_account_id, sip)
+	## create a sip (update the sip account)
+	ref = self.update_sip(sip_account_id, sip)
 	
 	## get sip manager key
 	manager_aws_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
