@@ -372,14 +372,10 @@ class AWS(wsgi.Application):
         #print("sec_admin_arn=", sec_admin_arn)
 
 	## get the sip 
-	sip = {}
-	sip['status'] = "0"
-	sip['sip_members'] = ""
-	sip['sip_account_id'] = sip_account_id
-	sip['account_name'] = ""
-	print("")	
-	print("sip=", sip)	
-	print("")	
+        sip = self.get_sip(sip_account_id)
+	if(sip['status'] == "0"):
+	    print("The sip doesn't exist!")
+	    return
 
 	### delete roles and policies in the sip AWS account
         ## get sip manager key
@@ -406,16 +402,11 @@ class AWS(wsgi.Application):
         print("")
 
 	## test roles_policy_get
-	#response = aws_sip.role_get(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name='SIPadminCPS')
+	#response = aws_sip.role_policy_get(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name='SIPadminCPS', policy_name='SIPadminCPS')
        	#print("")
-       	#print("TEST! response to roles_get=", response)
+       	#print("TEST! response to roles_policy_get=", response)
        	#print("")
-	response = aws_sip.role_policy_get(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name='SIPadminCPS', policy_name='SIPadminCPS')
-       	print("")
-       	print("TEST! response to roles_policy_get=", response)
-       	print("")
 
-	"""
         # list roles
         response = aws_sip.roles_list(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, path="/")
         print("")
@@ -428,29 +419,28 @@ class AWS(wsgi.Application):
             index = index + 1
             print("")
             print("role_name=", role_name)
-            #print("role_name[0:3]=", role_name[0:3])
 	    
             # delete roles
             if(role_name[0:3] == "SIP"):
-		# get policy attached to the role
+		# get policy 
 		policy_name = role_name
                 print("")
                 print("role_name=", role_name)
                 print("policy_name=", policy_name)
-		response = aws_sip.role_policy_get(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name, policy_name)
-        	print("")
-        	print("response to roles_policy_get=", response)
-        	print("")
-	        # detach policies to the role
-		#ref = aws_sip.detach_role_policy(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_session_token, role_name, policy_arn)
-                #print("")
-                #print("going to delete role: role_name=", role_name)
-                #ref = aws_sip.role_delete(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name)
+		#response = aws_sip.role_policy_get(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name, policy_name)
+        	#print("")
+        	#print("response to roles_policy_get=", response)
+        	#print("")
+	        # detach policies from the role
+		policy_arn = "arn:aws:iam::" + sip_account_id + ":policy/" + policy_name 
+                print("policy_arn=", policy_arn)
+		ref = aws_sip.detach_role_policy(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name, policy_arn)
+                print("")
+                print("going to delete role: role_name=", role_name)
+                ref = aws_sip.role_delete(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name)
 
-	"""
-	"""
 	# list policies
-	response = aws_sip.policies_list(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, scope="Local", onlyattached=True, path="/")
+	response = aws_sip.policies_list(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, scope="Local", onlyattached=False, path="/")
         print("")
 	print("response to policy_list=", response)
         print("")
@@ -463,15 +453,22 @@ class AWS(wsgi.Application):
             print("")
 	    print("policy_name=", policy_name)
 	    print("policy_arn=", policy_arn)
-	    # delete roles
+	    # delete policies
 	    if(policy_name[0:3] == "SIP"):
                 print("")
 	        print("going to delete policy: policy_name=", policy_name)
 		ref = aws_sip.policy_delete(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, policy_arn)
-	"""
 
         ## update the sip account to an available AWS account
-        #ref = self.update_sip(sip_account_id, sip)
+	sip = {}
+	sip['status'] = "0"
+	sip['sip_members'] = ""
+	sip['sip_account_id'] = sip_account_id
+	sip['account_name'] = ""
+	print("")	
+	print("sip=", sip)	
+	print("")	
+        ref = self.update_sip(sip_account_id, sip)
 
 	return 
 
