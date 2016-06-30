@@ -24,6 +24,7 @@ from sidserver.common import wsgi
 from sidserver import controllers
 from sidserver import routers
 from sidserver import aws
+#from sidserver import azure
 
 
 CONF = cfg.CONF
