@@ -76,6 +76,7 @@ class SIPs():
 	    ref.account_name = new_sip.account_name
 	    ref.sip_members = new_sip.sip_members
 	    ref.status = new_sip.status
+	    ref.sid_id = new_sip.sid_id
         return ref.to_dict()
 
     def delete_sip(self, sip_account_id):
