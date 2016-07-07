@@ -466,36 +466,55 @@ class AWS(wsgi.Application):
     def user_add(self, context, auth=None):
         aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
         aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
-        org_name = context['environment']['openstack.params']['auth']['AWS_ACCOUNT_NAME']
-        org_aws_no = context['environment']['openstack.params']['auth']['AWS_ACCOUNT_NO']
-	#sip_name = context['environment']['openstack.params']['auth']['SIP_NAME']
 	sip_account_id = context['environment']['openstack.params']['auth']['SIP_ACCOUNT_ID']
-        sid_id = context['environment']['openstack.params']['auth']['SID_ID']
 	user_name = context['environment']['openstack.params']['auth']['USER_NAME']
 
-        ## verify the normal user
-        response = aws_sip.user_get(aws_access_key_id, aws_access_secret_key, user_name)
-	#get_user_name = ""
-	#get_user_name = response['User']['UserName'] 
-	#print("")
-	#print("response = ", response)
-	#print("get_user_name = ", get_user_name)
-	#print("")
-	#if (get_user_name ==""):
-	#    print("The user doesn't exist!")
-	#    return
+	## get info from admin user
+        response = aws_sip.user_get(aws_access_key_id, aws_access_secret_key, user_name=None)
+	admin_user_arn =  response['User']['Arn']
+	admin_user_name =  response['User']['UserName']
+	org_no = admin_user_arn.split(':')[4]
+	print("")
+	print("org_no = ", org_no)
+	print("")
 
 	## get the sip 
-        sip = self.get_sip(sip_account_id)
+	try:
+            sip = self.get_sip(sip_account_id)
+        except exception.NotFound as e:
+            raise exception.NotFound(e)
+	print("")
+	print("sip = ", sip)
+	print("")
 	if(sip['status'] == "0"):
 	    print("The sip doesn't exist!")
 	    return
 
-	## verigy the org
+	## verify the membership of org/admin in the sip (check if admin org is in the sip members)
+	get_sip_members = sip['sip_members']
+	print("")
+	print("get_sip_members=", get_sip_members)
+	print("")
+	# get admin org name 
+	get_admin_org_name = ""
+	for key, value in get_sip_members.iteritems():
+	    print("key=", key)
+	    print("value=", value)
+	    if (value == org_no):
+		get_admin_org_name = key
+	org_name = get_admin_org_name
+	print("")
+	print("org_name=", org_name)
+	print("")
+	if( org_name == ""):
+	    print("Your org doesn't belong to the sip!")
+	    return
 
-	## verify the membership of org/admin in the sip
-
-	## verify the sid ownership of the sip
+        ## verify the normal user
+	try:
+            response = aws_sip.user_get(aws_access_key_id, aws_access_secret_key, user_name)
+        except exception.NotFound as e:
+            raise exception.NotFound(e)
 
         ## get sip manager key
         manager_aws_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
@@ -543,7 +562,7 @@ class AWS(wsgi.Application):
 	    return
 	get_admin_org_no = admin_principals_aws.split(':')[4]
 	print("get_admin_org_no=", get_admin_org_no)
-	if (get_admin_org_no != org_aws_no):
+	if (get_admin_org_no != org_no):
 	    print("The admin user does not belong to the member organization in the sip!")
 	    return
 
@@ -568,7 +587,7 @@ class AWS(wsgi.Application):
 	    old_principals_aws = [old_principals_aws]
 	    #print("old_principals_aws=", old_principals_aws)
 	# get a new user/principla aws for the new policy
-	new_principals_aws_str = "arn:aws:iam::" + org_aws_no + ":user/" + user_name
+	new_principals_aws_str = "arn:aws:iam::" + org_no + ":user/" + user_name
 	new_principals_aws = [new_principals_aws_str] 
 	print("new_principals_aws=", new_principals_aws)
 	#print("type of new_principals_aws=", type(new_principals_aws))
@@ -605,6 +624,7 @@ class AWS(wsgi.Application):
         aws_sip.attach_role_policy(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name, policy_arn)
 
 	return 
+
 
     def sip_get(self, context, auth=None):
 	sip_account_id = context['environment']['openstack.params']['auth']['SIP_ACCOUNT_ID']

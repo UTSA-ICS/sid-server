@@ -24,17 +24,17 @@ def user_get(access_key_id, access_secret_key, user_name):
 	user = client.get_user()
     else:
         user = client.get_user(UserName=user_name)
-    print("")
-    print("The user is: ", user)
-    print("")
+    #print("")
+    #print("The user is: ", user)
+    #print("")
     return user
 
 def user_create(access_key_id, access_secret_key, path, user_name):
     client = boto3.client('iam', aws_access_key_id=access_key_id, aws_secret_access_key=access_secret_key)
     user = client.create_user(Path=path, UserName=user_name)
-    print("")
-    print("The new created user is: ", user)
-    print("")
+    #print("")
+    #print("The new created user is: ", user)
+    #print("")
     return user
 
 def user_delete(access_key_id, access_secret_key, user_name):
@@ -51,11 +51,11 @@ def policies_list(access_key_id, access_secret_key, session_token, scope, onlyat
 def policy_get(access_key_id, access_secret_key, session_token, policy_arn):
     client = boto3.client('iam', aws_access_key_id=access_key_id, aws_secret_access_key=access_secret_key, aws_session_token=session_token)
     #policy = client.get_policy(PolicyArn='arn:aws:iam::aws:policy/AdministratorAccess')
-    print("policy_arn=", policy_arn)
+    #print("policy_arn=", policy_arn)
     policy = client.get_policy(PolicyArn=policy_arn)
-    print("")
-    print("The policy is: ", policy)
-    print("")
+    #print("")
+    #print("The policy is: ", policy)
+    #print("")
     return policy
 
 def policy_create(access_key_id, access_secret_key, session_token, policy_name, policy_doc):
@@ -64,9 +64,9 @@ def policy_create(access_key_id, access_secret_key, session_token, policy_name, 
     desc=''
     policy = client.create_policy(PolicyName=policy_name, Path=path, PolicyDocument=policy_doc, Description=desc)
     #policy = client.create_policy(PolicyName='AssumeRoleTest', Path='/', PolicyDocument='', Description='')
-    print("")
-    print("The new created policy is: ", policy)
-    print("")
+    #print("")
+    #print("The new created policy is: ", policy)
+    #print("")
     return policy
 
 def policy_delete(access_key_id, access_secret_key, session_token, policy_arn):
