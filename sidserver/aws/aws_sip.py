@@ -18,9 +18,12 @@ if __name__ == "__main__":
     aws_login()
 
 
-def user_get(access_key_id, access_secret_key):
+def user_get(access_key_id, access_secret_key, user_name):
     client = boto3.client('iam', aws_access_key_id=access_key_id, aws_secret_access_key=access_secret_key)
-    user = client.get_user()
+    if (user_name == None):
+	user = client.get_user()
+    else:
+        user = client.get_user(UserName=user_name)
     print("")
     print("The user is: ", user)
     print("")
