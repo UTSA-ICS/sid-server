@@ -290,10 +290,10 @@ class AWS(wsgi.Application):
 	manager_aws_access_secret_key = "xNZ2HQqmXoOUJ2dJMmEdCcUjD2p4SJQfGA1HxLRy"
 
 	## assume sip manager role in the Sip
-	sip1_manager_role_arn = "arn:aws:iam::" + sip_account_id + ":role/SIDmanager"
+	sip_manager_role_arn = "arn:aws:iam::" + sip_account_id + ":role/SIDmanager"
 	role_session_name = "sip_manager"
 	assume_role_policy = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Action\": \"iam:*\", \"Resource\": \"*\" } ] }"
-	response = aws_sip.assume_role(manager_aws_access_key_id, manager_aws_access_secret_key, sip1_manager_role_arn, role_session_name, assume_role_policy)
+	response = aws_sip.assume_role(manager_aws_access_key_id, manager_aws_access_secret_key, sip_manager_role_arn, role_session_name, assume_role_policy)
 	print("")	
 	print("Assume role credentials, response=", response)	
 	print("")	
@@ -321,7 +321,6 @@ class AWS(wsgi.Application):
 	    ## create policies for SIPadmin roles
 	    policy_name = "SIPadmin" + org
 	    policy_doc = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Sid\": \"AllowCPSSecAdminToListRolesUsers\", \"Effect\": \"Allow\", \"Action\": [ \"iam:ListRoles\", \"iam:ListUsers\", \"iam:ListPolicies\", \"iam:GetPolicy\" ], \"Resource\": [ \"arn:aws:iam::*\"  ] }, { \"Sid\": \"AllowCPSSecAdminToUpdateAssumeRolePolicy\", \"Effect\": \"Allow\", \"Action\": [ \"iam:*\" ], \"Resource\": [ \"arn:aws:iam::" + sip_account_id + ":role/SIPmember" + org + "\" ] } ] }"
-	    #policy_doc = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Sid\": \"AllowCPSSecAdminToUpdateAssumeRolePolicy\", \"Effect\": \"Allow\", \"Action\": [ \"iam:UpdateAssumeRolePolicy\", \"iam:GetRole\" ], \"Resource\": [ \"arn:aws:iam::" + sip_account_id + ":role/SIPmember" + org + "\" ] }, { \"Sid\": \"AllowCPSSecAdminToListUsers\", \"Effect\": \"Allow\", \"Action\": [ \"iam:ListUsers\", \"iam:GetUser\" ], \"Resource\": [ \"arn:aws:iam::" + sip_account_id + ":user/\" ] }, { \"Sid\": \"AllowCPSSecAdminToListRoles\", \"Effect\": \"Allow\", \"Action\": [ \"iam:ListRoles\", \"iam:GetRole\" ], \"Resource\": [ \"arn:aws:iam::" + sip_account_id + ":role/\" ] } ] }"
 	    role_policy = aws_sip.policy_create(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key,temp_manager_aws_access_session_token, policy_name, policy_doc)
 	    print("SIPadmin role policy:", role_policy)
 	    ## attach policy to SIPadmin roles
@@ -411,10 +410,10 @@ class AWS(wsgi.Application):
         manager_aws_access_secret_key = "xNZ2HQqmXoOUJ2dJMmEdCcUjD2p4SJQfGA1HxLRy"
 
         ## assume sip manager role in the Sip
-        sip1_manager_role_arn = "arn:aws:iam::" + sip_account_id + ":role/SIDmanager"
+        sip_manager_role_arn = "arn:aws:iam::" + sip_account_id + ":role/SIDmanager"
         role_session_name = "sip_manager"
         assume_role_policy = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Action\": \"iam:*\", \"Resource\": \"*\" } ] }"
-        response = aws_sip.assume_role(manager_aws_access_key_id, manager_aws_access_secret_key, sip1_manager_role_arn, role_session_name, assume_role_policy)
+        response = aws_sip.assume_role(manager_aws_access_key_id, manager_aws_access_secret_key, sip_manager_role_arn, role_session_name, assume_role_policy)
         print("")
         print("Assume role credentials, response=", response)
         print("")
@@ -445,7 +444,6 @@ class AWS(wsgi.Application):
             raise exception.NotFound("The user is not an admin in the sip!")
             return
 
-	"""
         # list roles
         response = aws_sip.roles_list(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, path="/")
         print("")
@@ -501,15 +499,15 @@ class AWS(wsgi.Application):
         ## update the sip account to an available AWS account
 	sip = {}
 	sip['status'] = "0"
-	sip['sip_members'] = ""
+	sip['sip_members'] = {}
 	sip['sip_account_id'] = sip_account_id
 	sip['account_name'] = ""
+	sip['sid_id'] = ""
 	print("")	
 	print("sip=", sip)	
 	print("")	
         ref = self.update_sip(sip_account_id, sip)
 	
-	"""
 	return 
 
     def user_add(self, context, auth=None):
@@ -573,10 +571,10 @@ class AWS(wsgi.Application):
         manager_aws_access_secret_key = "xNZ2HQqmXoOUJ2dJMmEdCcUjD2p4SJQfGA1HxLRy"
 
         ## assume sip manager role in the Sip
-        sip1_manager_role_arn = "arn:aws:iam::" + sip_account_id + ":role/SIDmanager"
+        sip_manager_role_arn = "arn:aws:iam::" + sip_account_id + ":role/SIDmanager"
         role_session_name = "sip_manager"
         assume_role_policy = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Action\": \"iam:*\", \"Resource\": \"*\" } ] }"
-        response = aws_sip.assume_role(manager_aws_access_key_id, manager_aws_access_secret_key, sip1_manager_role_arn, role_session_name, assume_role_policy)
+        response = aws_sip.assume_role(manager_aws_access_key_id, manager_aws_access_secret_key, sip_manager_role_arn, role_session_name, assume_role_policy)
         print("")
         print("Assume role credentials, response=", response)
         print("")
@@ -729,10 +727,10 @@ class AWS(wsgi.Application):
         manager_aws_access_secret_key = "xNZ2HQqmXoOUJ2dJMmEdCcUjD2p4SJQfGA1HxLRy"
 
         ## assume sip manager role in the Sip
-        sip1_manager_role_arn = "arn:aws:iam::" + sip_account_id + ":role/SIDmanager"
+        sip_manager_role_arn = "arn:aws:iam::" + sip_account_id + ":role/SIDmanager"
         role_session_name = "sip_manager"
         assume_role_policy = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Action\": \"iam:*\", \"Resource\": \"*\" } ] }"
-        response = aws_sip.assume_role(manager_aws_access_key_id, manager_aws_access_secret_key, sip1_manager_role_arn, role_session_name, assume_role_policy)
+        response = aws_sip.assume_role(manager_aws_access_key_id, manager_aws_access_secret_key, sip_manager_role_arn, role_session_name, assume_role_policy)
         print("")
         print("Assume role credentials, response=", response)
         print("")
