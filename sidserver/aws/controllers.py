@@ -233,29 +233,36 @@ class AWS(wsgi.Application):
 	sid_id = context['environment']['openstack.params']['auth']['SID_ID']
 	    
 	# verify the set of member organizations
-	sid = self.get_sid(sid_id)
+	try:
+	    sid = self.get_sid(sid_id)
+	except exception.NotFound as e:
+            raise exception.NotFound("Can't find the sid!")
 	members_in_sid = sid['sid_members']
-	flag = 0
-	for org in member_orgs:
-	    if org not in members_in_sid:
-		flag = 1
-		print("")
-		print("Organization " + org + " doesn't belong to the SID")
-		print("")
-	#print("member_orgs=", member_orgs)
+        #print("")
 	#print("members_in_sid=", members_in_sid)
-	#print("flag=", flag)
+	#print("member_orgs=", member_orgs)
+        #print("")
+	if( member_orgs != members_in_sid ):
+	    raise exception.NotFound("Sip member orgs dont match the sid members!")
 
         ## verify the sec_admin user
-        user = aws_sip.user_get(aws_access_key_id, aws_access_secret_key, user_name=None)
-        if (user == ""):
-            print("The user doesn't exist!")
-            return
-
+        try:
+            response = aws_sip.user_get(aws_access_key_id, aws_access_secret_key, user_name=None)
+        except exception.NotFound as e:
+            raise exception.NotFound("Can't find the user!")
+        admin_user_arn =  response['User']['Arn']
+        get_admin_org_no = admin_user_arn.split(':')[4]
+	if( get_admin_org_no != member_orgs.get(org_name) ):
+            raise exception.NotFound("The user org doesnt match with the member orgs!" )
+	    return
+        #print("")
+        #print("member_orgs.get(org_name) = ", member_orgs.get(org_name))
+        #print("")
+	    
 	## get sec_admin org account number and sec_admin user name
 	## e.g.: User ARN: arn:aws:iam::934324332443:user/SecAdmin
-	sec_admin_name = user['User']['UserName']
-	sec_admin_arn = user['User']['Arn']
+	sec_admin_name = response['User']['UserName']
+	sec_admin_arn = response['User']['Arn']
 	org_account_no = sec_admin_arn[13:24]
 	print("")	
 	print("sec_admin_name=", sec_admin_name)
@@ -323,7 +330,7 @@ class AWS(wsgi.Application):
 
 	    ## SIPmemberXXX roles:
 	    role_name2 = "SIPmember" + org
-	    assume_role_policy_doc2 = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::" + member_orgs[org] + ":root\" }, \"Action\": \"sts:AssumeRole\" } ] }"
+	    assume_role_policy_doc2 = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::" + member_orgs[org] + ":user/SecAdmin\" }, \"Action\": \"sts:AssumeRole\" } ] }"
 	    print("assume_role_policy_doc2 = ", assume_role_policy_doc2)
             role2 = aws_sip.role_create(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, path, role_name2, assume_role_policy_doc2)
 
@@ -335,38 +342,68 @@ class AWS(wsgi.Application):
 	    ## attach policy to SIPmember roles
 	    policy_arn2 = role_policy2['Policy']['Arn']
             aws_sip.attach_role_policy(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name2, policy_arn2)
+
         return 
 
     def sip_delete(self, context, auth=None):
         aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
         aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
-        org_name = context['environment']['openstack.params']['auth']['AWS_ACCOUNT']
         member_orgs = context['environment']['openstack.params']['auth']['MEMBER_ORGS']
-        sid_id = context['environment']['openstack.params']['auth']['SID_ID']
 	sip_account_id = context['environment']['openstack.params']['auth']['SIP_ACCOUNT_ID']
 
-        # verify the set of member organizations
-        sid = self.get_sid(sid_id)
-        members_in_sid = sid['sid_members']
-        flag = 0
-        for org in member_orgs:
-            if org not in members_in_sid:
-                flag = 1
-                print("")
-                print("Organization " + org + " doesn't belong to the SID")
-                print("")
+        ## get info from admin user
+        response = aws_sip.user_get(aws_access_key_id, aws_access_secret_key, user_name=None)
+        admin_user_arn =  response['User']['Arn']
+        org_no = admin_user_arn.split(':')[4]
+        print("")
+        print("org_no = ", org_no)
+        print("")
 
-        ## verify the sec_admin user
-        user = aws_sip.user_get(aws_access_key_id, aws_access_secret_key, user_name=None)
-        if (user == ""):
-            print("The user doesn't exist!")
+        ## get the sip
+        try:
+            sip = self.get_sip(sip_account_id)
+        except exception.NotFound as e:
+            raise exception.NotFound("Cannot find the sip!")
+        if(sip['status'] == "0"):
+            print("The sip doesn't exist!")
+            return
+        print("")
+        print("sip=", sip)
+        print("")
+	sid_id = sip['sid_id']
+
+        ## verify the membership of org/admin in the sip (check if admin org is in the sip members)
+        get_sip_members = sip['sip_members']
+        print("")
+        print("get_sip_members=", get_sip_members)
+        print("")
+        # get admin org name
+        get_admin_org_name = ""
+        for key, value in get_sip_members.iteritems():
+            print("key=", key)
+            print("value=", value)
+            if (value == org_no):
+                get_admin_org_name = key
+        org_name = get_admin_org_name
+        print("")
+        print("org_name=", org_name)
+        print("")
+        if( org_name == ""):
+            print("Your org doesn't belong to the sip!")
             return
 
-	## get the sip 
-        sip = self.get_sip(sip_account_id)
-	if(sip['status'] == "0"):
-	    print("The sip doesn't exist!")
-	    return
+        # verify the set of member organizations
+        try:
+            sid = self.get_sid(sid_id)
+        except exception.NotFound as e:
+            raise exception.NotFound("Can't find the sid!")
+        members_in_sid = sid['sid_members']
+        #print("")
+        #print("members_in_sid=", members_in_sid)
+        #print("member_orgs=", member_orgs)
+        #print("")
+        if( member_orgs != members_in_sid ):
+            raise exception.NotFound("Sip member orgs dont match the sid members!")
 
 	### delete roles and policies in the sip AWS account
         ## get sip manager key
@@ -392,12 +429,23 @@ class AWS(wsgi.Application):
         print("temp_manager_aws_access_session_token=", temp_manager_aws_access_session_token)
         print("")
 
-	## test roles_policy_get
-	#response = aws_sip.role_policy_get(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name='SIPadminCPS', policy_name='SIPadminCPS')
-       	#print("")
-       	#print("TEST! response to roles_policy_get=", response)
-       	#print("")
+        ## verify the admin user in the sip
+        # verify the admin user has a SIPadminOrg role in the sip
+        role_name = "SIPadmin" + org_name
+        response = aws_sip.role_get(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name)
+        admin_assume_role_policy_doc = response['Role']['AssumeRolePolicyDocument']
+        print("")
+        print("admin_assume_role_policy_doc=", admin_assume_role_policy_doc)
+        print("")
+        # get admin role principlas (admin user arn) in the role
+        admin_principals_aws = admin_assume_role_policy_doc['Statement'][0]['Principal']['AWS']
+        print("admin_principals_aws=", admin_principals_aws)
+        if (admin_principals_aws != admin_user_arn):
+            print("The user is not an admin in the sip!")
+            raise exception.NotFound("The user is not an admin in the sip!")
+            return
 
+	"""
         # list roles
         response = aws_sip.roles_list(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, path="/")
         print("")
@@ -460,7 +508,8 @@ class AWS(wsgi.Application):
 	print("sip=", sip)	
 	print("")	
         ref = self.update_sip(sip_account_id, sip)
-
+	
+	"""
 	return 
 
     def user_add(self, context, auth=None):
@@ -514,7 +563,10 @@ class AWS(wsgi.Application):
 	try:
             response = aws_sip.user_get(aws_access_key_id, aws_access_secret_key, user_name)
         except exception.NotFound as e:
-            raise exception.NotFound(e)
+            #raise exception.NotFound(e)
+            raise exception.NotFound("Can't find the user!")
+	#! we dont need to verify if the user is in the same org as the admin user, 
+	#! because by default (giving keys) the admin user can only access to his own account
 
         ## get sip manager key
         manager_aws_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
@@ -539,12 +591,7 @@ class AWS(wsgi.Application):
         print("temp_manager_aws_access_session_token=", temp_manager_aws_access_session_token)
         print("")
 
-        ## verify the admin user
-        response = aws_sip.user_get(aws_access_key_id, aws_access_secret_key, user_name=None)
-	admin_name = response['User']['UserName'] 
-        if (response == ""):
-            print("The user doesn't exist!")
-            return
+        ## verify the admin user in the sip
 	# verify the admin user has a SIPadminOrg role in the sip
 	role_name = "SIPadmin" + org_name
 	response = aws_sip.role_get(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name)
@@ -555,15 +602,9 @@ class AWS(wsgi.Application):
 	# get admin role principlas aws in the role
 	admin_principals_aws = admin_assume_role_policy_doc['Statement'][0]['Principal']['AWS']
 	print("admin_principals_aws=", admin_principals_aws)
-	get_admin_name = admin_principals_aws.split('/')[1]
-	print("get_admin_name=", get_admin_name)
-	if (get_admin_name != admin_name):
-	    print("The admin user is not allowed to access the sip!")
-	    return
-	get_admin_org_no = admin_principals_aws.split(':')[4]
-	print("get_admin_org_no=", get_admin_org_no)
-	if (get_admin_org_no != org_no):
-	    print("The admin user does not belong to the member organization in the sip!")
+	if (admin_principals_aws != admin_user_arn):
+	    print("The user is not an admin in the sip!")
+	    raise exception.NotFound("The user is not an admin in the sip!")
 	    return
 
 	### SecAdmin user add normal users to a Sip
@@ -579,7 +620,10 @@ class AWS(wsgi.Application):
         print("old_assume_role_policy_doc=", old_assume_role_policy_doc)
         print("")
 	# get existing users/principlas aws (array) in the existing role
-	old_principals_aws = old_assume_role_policy_doc['Statement'][0]['Principal']['AWS']
+	if('Principal' in old_assume_role_policy_doc['Statement'][0]):
+	    old_principals_aws = old_assume_role_policy_doc['Statement'][0]['Principal']['AWS']
+	else:
+	    old_principals_aws = []
 	print("old_principals_aws=", old_principals_aws)
 	#print("type of old_principals_aws=", type(old_principals_aws))
 	#print("length of old_principals_aws=", len(old_principals_aws))
@@ -599,10 +643,170 @@ class AWS(wsgi.Application):
 	for element in assume_role_policy_doc_body_list:
 	    new_element = '\"' + element + '\"'
 	    new_list = new_list + [new_element]
-	assume_role_policy_doc_body = ','.join(new_list)
+	assume_role_policy_doc_body = '[' + ','.join(new_list) + ']'
         print("assume_role_policy_doc_body = ", assume_role_policy_doc_body)
-	assume_role_policy_doc_head = "{ \"Version\": \"2012-10-17\", \"Statement\": [ {  \"Action\": \"sts:AssumeRole\", \"Effect\": \"Allow\", \"Principal\": {\"AWS\": ["
-	assume_role_policy_doc_tail = "] } } ] }"
+	assume_role_policy_doc_head = "{ \"Version\": \"2012-10-17\", \"Statement\": [ {  \"Action\": \"sts:AssumeRole\", \"Effect\": \"Allow\", \"Principal\": {\"AWS\": "
+	assume_role_policy_doc_tail = " } } ] }"
+	assume_role_policy_doc = assume_role_policy_doc_head + assume_role_policy_doc_body + assume_role_policy_doc_tail
+        print("assume_role_policy_doc = ", assume_role_policy_doc)
+        # delete the old SIPmemberXXX role
+	# get policy 
+	policy_name = role_name
+        print("")
+        print("policy_name=", policy_name)
+	# detach policy from the old role
+	policy_arn = "arn:aws:iam::" + sip_account_id + ":policy/" + policy_name 
+        print("policy_arn=", policy_arn)
+	ref = aws_sip.detach_role_policy(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name, policy_arn)
+        print("")
+        print("going to delete role: role_name=", role_name)
+        ref = aws_sip.role_delete(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name)
+	# re-create the SIPmemberXXX role 
+        aws_sip.role_create(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, path, role_name, assume_role_policy_doc)
+
+        ## attach policy to the SIPmemberXXX role
+        aws_sip.attach_role_policy(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name, policy_arn)
+
+	return 
+
+    def user_remove(self, context, auth=None):
+        aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+        aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+	sip_account_id = context['environment']['openstack.params']['auth']['SIP_ACCOUNT_ID']
+	user_name = context['environment']['openstack.params']['auth']['USER_NAME']
+
+	### get info and verifications
+	## get info from admin user
+        response = aws_sip.user_get(aws_access_key_id, aws_access_secret_key, user_name=None)
+	admin_user_arn =  response['User']['Arn']
+	admin_user_name =  response['User']['UserName']
+	org_no = admin_user_arn.split(':')[4]
+	print("")
+	print("org_no = ", org_no)
+	print("")
+
+	## get the sip 
+	try:
+            sip = self.get_sip(sip_account_id)
+        except exception.NotFound as e:
+            raise exception.NotFound(e)
+	print("")
+	print("sip = ", sip)
+	print("")
+	if(sip['status'] == "0"):
+	    print("The sip doesn't exist!")
+	    return
+
+	## verify the membership of org/admin in the sip (check if admin org is in the sip members)
+	get_sip_members = sip['sip_members']
+	print("")
+	print("get_sip_members=", get_sip_members)
+	print("")
+	# get admin org name 
+	get_admin_org_name = ""
+	for key, value in get_sip_members.iteritems():
+	    print("key=", key)
+	    print("value=", value)
+	    if (value == org_no):
+		get_admin_org_name = key
+	org_name = get_admin_org_name
+	print("")
+	print("org_name=", org_name)
+	print("")
+	if( org_name == ""):
+	    print("Your org doesn't belong to the sip!")
+	    return
+
+        ## verify the normal user
+	try:
+            response = aws_sip.user_get(aws_access_key_id, aws_access_secret_key, user_name)
+        except exception.NotFound as e:
+            raise exception.NotFound(e)
+
+	### start removing the user
+        ## get sip manager key
+        manager_aws_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
+        manager_aws_access_secret_key = "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"
+
+        ## assume sip manager role in the Sip
+        sip1_manager_role_arn = "arn:aws:iam::" + sip_account_id + ":role/SIDmanager"
+        role_session_name = "sip_manager"
+        assume_role_policy = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Action\": \"iam:*\", \"Resource\": \"*\" } ] }"
+        response = aws_sip.assume_role(manager_aws_access_key_id, manager_aws_access_secret_key, sip1_manager_role_arn, role_session_name, assume_role_policy)
+        print("")
+        print("Assume role credentials, response=", response)
+        print("")
+
+        ## get sip manager tempory key for assume role
+        temp_manager_aws_access_key_id = response["Credentials"]["AccessKeyId"]
+        temp_manager_aws_access_secret_key = response["Credentials"]["SecretAccessKey"]
+        temp_manager_aws_access_session_token = response["Credentials"]["SessionToken"]
+        print("")
+        print("temp_manager_aws_access_key_id=", temp_manager_aws_access_key_id)
+        print("temp_manager_aws_access_secret_key=", temp_manager_aws_access_secret_key)
+        print("temp_manager_aws_access_session_token=", temp_manager_aws_access_session_token)
+        print("")
+
+        ## verify the admin user in the sip
+	# verify the admin user has a SIPadminOrg role in the sip
+	role_name = "SIPadmin" + org_name
+	response = aws_sip.role_get(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name)
+	admin_assume_role_policy_doc = response['Role']['AssumeRolePolicyDocument']
+        print("")
+        print("admin_assume_role_policy_doc=", admin_assume_role_policy_doc)
+        print("")
+	# get admin role principlas (admin user arn) in the role
+	admin_principals_aws = admin_assume_role_policy_doc['Statement'][0]['Principal']['AWS']
+	print("admin_principals_aws=", admin_principals_aws)
+	if (admin_principals_aws != admin_user_arn):
+	    print("The user is not an admin in the sip!")
+	    raise exception.NotFound("The user is not an admin in the sip!")
+	    return
+
+	### SecAdmin user remove normal users from a Sip
+        # Update SIPmember roles (delete the role, then re-create it)
+	role_name = "SIPmember" + org_name
+	path="/"
+        print("")
+        print("role_name=", role_name)
+	# get the old trust relationship 
+	response = aws_sip.role_get(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name)
+	old_assume_role_policy_doc = response['Role']['AssumeRolePolicyDocument']
+        print("")
+        print("old_assume_role_policy_doc=", old_assume_role_policy_doc)
+        print("")
+	# get existing users/principlas aws (array) in the existing role
+	if('Principal' in old_assume_role_policy_doc['Statement'][0]):
+	    old_principals_aws = old_assume_role_policy_doc['Statement'][0]['Principal']['AWS']
+	else:
+	    old_principals_aws = []
+	print("old_principals_aws=", old_principals_aws)
+	if type(old_principals_aws) is not list:
+	    old_principals_aws = [old_principals_aws]
+	    #print("old_principals_aws=", old_principals_aws)
+	# find the user/principle in the trust relationship 
+	new_principals_aws = []
+	for element in old_principals_aws:
+	    if(user_name in element):
+		print("User %s will be removed from the sip!", user_name)
+	    else:
+		new_principals_aws.extend([element])
+		#new_principals_aws = new_principals_aws + [element]
+		print("new_principals_aws=", new_principals_aws)
+		
+	print("$$$new_principals_aws=", new_principals_aws)
+	if(len(new_principals_aws) == 1):
+	    assume_role_policy_doc_body = '\"' + new_principals_aws[0]  + '\"' 
+	else:
+	    new_list = []
+	    for element in new_principals_aws:
+	        new_element = '\"' + element + '\"'
+	        new_list = new_list + [new_element]
+	    assume_role_policy_doc_body = '[' + ','.join(new_list) + ']'
+	# create the new trust relationship policy (assume_role_policy_doc)
+        print("assume_role_policy_doc_body = ", assume_role_policy_doc_body)
+	assume_role_policy_doc_head = "{ \"Version\": \"2012-10-17\", \"Statement\": [ {  \"Action\": \"sts:AssumeRole\", \"Effect\": \"Allow\", \"Principal\": {\"AWS\": "
+	assume_role_policy_doc_tail = " } } ] }"
 	assume_role_policy_doc = assume_role_policy_doc_head + assume_role_policy_doc_body + assume_role_policy_doc_tail
         print("assume_role_policy_doc = ", assume_role_policy_doc)
         # delete the old SIPmemberXXX role
@@ -629,9 +833,9 @@ class AWS(wsgi.Application):
     def sip_get(self, context, auth=None):
 	sip_account_id = context['environment']['openstack.params']['auth']['SIP_ACCOUNT_ID']
 	sip = self.get_sip(sip_account_id)
-	print("")	
-	print("sip=", sip)	
-	print("")	
+	#print("")	
+	#print("sip=", sip)	
+	#print("")	
 	return sip
 
     def sid_create(self, context, auth=None):
@@ -643,7 +847,6 @@ class AWS(wsgi.Application):
 	sid['sid_id'] = random_string 
 	sid['sid_name'] = sid_name
 	sid['sid_members'] = member_orgs
-	sid['status'] = "1"
 	print("")	
 	print("sid=", sid)	
 	print("")	

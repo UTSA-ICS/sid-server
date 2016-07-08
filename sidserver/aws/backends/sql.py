@@ -18,7 +18,7 @@ from sidserver import exception
 
 class SIPModel(sql.ModelBase, sql.DictBase):
     __tablename__ = 'SIPs'
-    attributes = ['sip_account_id', 'account_name', 'sip_members', 'status']
+    attributes = ['sip_account_id', 'account_name', 'sip_members', 'status', 'sid_id']
     sip_account_id = sql.Column(sql.String(64), primary_key=True)
     account_name = sql.Column(sql.String(64), nullable=True)
     sip_members = sql.Column(sql.JsonBlob(), nullable=True)
@@ -27,11 +27,10 @@ class SIPModel(sql.ModelBase, sql.DictBase):
     
 class SIDModel(sql.ModelBase, sql.DictBase):
     __tablename__ = 'SIDs'
-    attributes = ['sid_id', 'sid_name', 'sid_members', 'status']
+    attributes = ['sid_id', 'sid_name', 'sid_members']
     sid_id = sql.Column(sql.String(32), primary_key=True)
     sid_name = sql.Column(sql.String(32), nullable=True)
     sid_members = sql.Column(sql.JsonBlob(), nullable=True)
-    status = sql.Column(sql.String(1), nullable=True)
     
 
 class SIPs():
