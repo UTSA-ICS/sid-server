@@ -848,17 +848,18 @@ class AWS(wsgi.Application):
 	print("")	
 	print("sid=", sid)	
 	print("")	
-	sid = self.add_sid(sid)	
+	sid = self.Mysid.add_sid(sid)	
 	return sid
 
     def sid_delete(self, context, auth=None):
 	sid_id = context['environment']['openstack.params']['auth']['SID_ID']
-	self.delete_sid(sid_id)
+	sid = self.Mysid.delete_sid(sid_id)
 	return 
 
     def sid_get(self, context, auth=None):
 	sid_id = context['environment']['openstack.params']['auth']['SID_ID']
-	sid = self.get_sid(sid_id)
+	#sid = self.get_sid(sid_id)
+	sid = self.Mysid.get_sid(sid_id)
 	print("")	
 	print("sid=", sid)	
 	print("")	
@@ -909,3 +910,6 @@ class AWS(wsgi.Application):
         ret = self.Mysid.get_sid(sid_id)
         return ret
 
+    def delete_sid(self, sid_id):
+        ret = self.Mysid.delete_sid(sid_id)
+        return ret
