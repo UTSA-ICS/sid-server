@@ -124,4 +124,12 @@ class Router(wsgi.ComposableRouter):
                        controller=aws_controller,
                        action='user_remove',
                        conditions=dict(method=['POST']))
+        mapper.connect('/aws/cp_user_add',
+                       controller=aws_controller,
+                       action='cp_user_add',
+                       conditions=dict(method=['POST']))
+        mapper.connect('/aws/cp_user_remove',
+                       controller=aws_controller,
+                       action='cp_user_remove',
+                       conditions=dict(method=['POST']))
 
