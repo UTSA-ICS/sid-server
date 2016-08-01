@@ -27,10 +27,12 @@ class SIPModel(sql.ModelBase, sql.DictBase):
     
 class SIDModel(sql.ModelBase, sql.DictBase):
     __tablename__ = 'SIDs'
-    attributes = ['sid_id', 'sid_name', 'sid_members']
+    attributes = ['sid_id', 'sid_name', 'sid_members', 'core_project', 'open_project']
     sid_id = sql.Column(sql.String(32), primary_key=True)
     sid_name = sql.Column(sql.String(32), nullable=True)
     sid_members = sql.Column(sql.JsonBlob(), nullable=True)
+    core_project = sql.Column(sql.String(32), nullable=True)
+    open_project = sql.Column(sql.String(32), nullable=True)
     
 
 class SIPs():
@@ -44,24 +46,27 @@ class SIPs():
 
         return ref.to_dict()
 
-    def list_sips(self):
-        session = sql.get_session()
-        refs = session.query(SIPModel).all()
-	#refs = query.filter_by(status="0").all()
-        return [ref.to_dict() for ref in refs]
-
-    def list_available_sips(self):
-        session = sql.get_session()
-        #refs = session.query(SIPModel).all()
-	refs = session.query(SIPModel).filter_by(status="0").all()
-        return [ref.to_dict() for ref in refs]
-
     def get_sip(self, sip_account_id):
         session = sql.get_session()
         ref = session.query(SIPModel).get(sip_account_id)
         if not ref:
             raise exception.NotFound(target=sip_account_id)
         return ref.to_dict()
+
+    def list_sips(self):
+        session = sql.get_session()
+        refs = session.query(SIPModel).all()
+        return [ref.to_dict() for ref in refs]
+
+    def list_available_sips(self):
+        session = sql.get_session()
+	refs = session.query(SIPModel).filter_by(status="0").all()
+        return [ref.to_dict() for ref in refs]
+
+    def list_sips_by_sid(self, sid_id):
+        session = sql.get_session()
+	refs = session.query(SIPModel).filter_by(sid_id=sid_id).all()
+        return [ref.to_dict() for ref in refs]
 
     @sql.handle_conflicts(conflict_type='sip')
     def update_sip(self, sip_account_id, sip):

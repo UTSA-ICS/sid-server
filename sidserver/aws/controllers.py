@@ -345,10 +345,14 @@ class AWS(wsgi.Application):
         return 
 
     def sip_delete(self, context, auth=None):
+	sip_account_id = context['environment']['openstack.params']['auth']['SIP_ACCOUNT_ID']
+	ref = self._sip_delete(sip_account_id, context)
+	return ref
+
+    def _sip_delete(self, sip_account_id, context):
         aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
         aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
         member_orgs = context['environment']['openstack.params']['auth']['MEMBER_ORGS']
-	sip_account_id = context['environment']['openstack.params']['auth']['SIP_ACCOUNT_ID']
 
         ## get info from admin user
         response = aws_sip.user_get(aws_access_key_id, aws_access_secret_key, user_name=None)
@@ -839,22 +843,495 @@ class AWS(wsgi.Application):
     def sid_create(self, context, auth=None):
 	member_orgs = context['environment']['openstack.params']['auth']['MEMBER_ORGS']
 	sid_name = context['environment']['openstack.params']['auth']['SID_NAME']
+	## generate a sid_id 
+	random_string = ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(32)])
+	sid_id = random_string 
+
+	## create core project
+	core_project = self.core_project_create(sid_id, context)
+
+	## create open project
+	open_project = "000"
+
 	## add a sid to SIDs table
 	sid = {}
-	random_string = ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(32)])
-	sid['sid_id'] = random_string 
+	sid['sid_id'] = sid_id 
 	sid['sid_name'] = sid_name
 	sid['sid_members'] = member_orgs
-	print("")	
-	print("sid=", sid)	
-	print("")	
+	sid['core_project'] = core_project
+	sid['open_project'] = open_project
 	sid = self.Mysid.add_sid(sid)	
+
 	return sid
 
     def sid_delete(self, context, auth=None):
+	member_orgs = context['environment']['openstack.params']['auth']['MEMBER_ORGS']
 	sid_id = context['environment']['openstack.params']['auth']['SID_ID']
+	sid = self.get_sid(sid_id)
+	cp_account_id = sid['core_project']
+	op_account_id = sid['open_project']
+
+	sips = self.Mysip.list_sips_by_sid(sid_id)
+	print("")
+	print("sips: ", sips)
+	print("")
+	for element in sips:
+	    print("")
+	    print("sip: ", element)
+	    print("")
+	    element_account_id = element['sip_account_id'] 
+	    # delete core project
+	    if(element_account_id == cp_account_id):
+		core_project = self.core_project_delete(cp_account_id, member_orgs, context)
+	    # delete open project
+	    else if(element_account_id == op_account_id):
+		open_project = self.open_project_delete(op_account_id, member_orgs, context)
+	    # delete all the sips
+	    else:
+                sip = self._sip_delete(element_account_id, context)
+
+	# delete sid record in db
 	sid = self.Mysid.delete_sid(sid_id)
-	return 
+	return sid
+
+    def core_project_create(self, sid_id, context):
+	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+	org_name = context['environment']['openstack.params']['auth']['AWS_ACCOUNT']
+	member_orgs = context['environment']['openstack.params']['auth']['MEMBER_ORGS']
+	sid_name = context['environment']['openstack.params']['auth']['SID_NAME']
+	    
+        ## verify the sec_admin user
+        try:
+            response = aws_sip.user_get(aws_access_key_id, aws_access_secret_key, user_name=None)
+        except exception.NotFound as e:
+            raise exception.NotFound("Can't find the user!")
+        admin_user_arn =  response['User']['Arn']
+        get_admin_org_no = admin_user_arn.split(':')[4]
+	if( get_admin_org_no != member_orgs.get(org_name) ):
+            raise exception.NotFound("The user org doesnt match with the member orgs!" )
+	    return
+        #print("")
+        #print("member_orgs.get(org_name) = ", member_orgs.get(org_name))
+        #print("")
+	    
+	## get sec_admin org account number and sec_admin user name
+	## e.g.: User ARN: arn:aws:iam::934324332443:user/SecAdmin
+	sec_admin_name = response['User']['UserName']
+	sec_admin_arn = response['User']['Arn']
+	org_account_no = sec_admin_arn[13:24]
+	print("")	
+	print("sec_admin_name=", sec_admin_name)
+	print("sec_admin_arn=", sec_admin_arn)
+	print("org_account_no=", org_account_no)
+	print("")	
+
+	## pick up one available AWS account for the core_project
+	cp_account_id = self.get_one_available_sip()
+	cp = {}
+	cp['status'] = "1"
+	cp['sip_members'] = member_orgs
+	cp['sip_account_id'] = cp_account_id
+	cp['account_name'] = sid_name + "_cp"
+	cp['sid_id'] = sid_id
+	print("")	
+	print("cp=", cp)	
+	print("")	
+
+	## create the core project (update the sip account)
+	ref = self.update_sip(cp_account_id, cp)
+	
+	## get cp manager key
+	manager_aws_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
+	manager_aws_access_secret_key = "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"
+
+	## assume cp manager role in core project 
+	cp_manager_role_arn = "arn:aws:iam::" + cp_account_id + ":role/SIDmanager"
+	role_session_name = "cp_manager"
+	assume_role_policy = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Action\": \"iam:*\", \"Resource\": \"*\" } ] }"
+	response = aws_sip.assume_role(manager_aws_access_key_id, manager_aws_access_secret_key, cp_manager_role_arn, role_session_name, assume_role_policy)
+	print("")	
+	print("Assume role credentials, response=", response)	
+	print("")	
+
+	## get cp manager tempory key for assume role
+	temp_manager_aws_access_key_id = response["Credentials"]["AccessKeyId"]
+	temp_manager_aws_access_secret_key = response["Credentials"]["SecretAccessKey"]
+	temp_manager_aws_access_session_token = response["Credentials"]["SessionToken"]
+	print("")	
+	print("temp_manager_aws_access_key_id=", temp_manager_aws_access_key_id)	
+	print("temp_manager_aws_access_secret_key=", temp_manager_aws_access_secret_key)	
+	print("temp_manager_aws_access_session_token=", temp_manager_aws_access_session_token)	
+	print("")	
+
+	## create CPadmin/CPmember roles for organizations in the Sip
+	## e.g. role name is like CPadminXXX/CPmemberXXX, XXX is org name
+	path = "/"
+	for org in member_orgs:
+	    ## CPadminXXX roles:
+	    role_name = "CPadmin" + org
+	    assume_role_policy_doc = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::" + member_orgs[org] + ":user/SecAdmin\" }, \"Action\": \"sts:AssumeRole\" } ] }"
+	    print("assume_role_policy_doc = ", assume_role_policy_doc)
+            role = aws_sip.role_create(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, path, role_name, assume_role_policy_doc)
+
+	    ## create policies for CPadmin roles
+	    policy_name = "CPadmin" + org
+	    policy_doc = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Sid\": \"AllowSecAdminToListRolesUsers\", \"Effect\": \"Allow\", \"Action\": [ \"iam:ListRoles\", \"iam:ListUsers\", \"iam:ListPolicies\", \"iam:GetPolicy\" ], \"Resource\": [ \"arn:aws:iam::*\"  ] }, { \"Sid\": \"AllowSecAdminToUpdateAssumeRolePolicy\", \"Effect\": \"Allow\", \"Action\": [ \"iam:*\" ], \"Resource\": [ \"arn:aws:iam::" + cp_account_id + ":role/CPmember" + org + "\" ] } ] }"
+	    role_policy = aws_sip.policy_create(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key,temp_manager_aws_access_session_token, policy_name, policy_doc)
+	    print("CPadmin role policy:", role_policy)
+	    ## attach policy to CPadmin roles
+	    policy_arn = role_policy['Policy']['Arn']
+            aws_sip.attach_role_policy(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name, policy_arn)
+
+	    ## CPmemberXXX roles:
+	    role_name2 = "CPmember" + org
+	    assume_role_policy_doc2 = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::" + member_orgs[org] + ":user/SecAdmin\" }, \"Action\": \"sts:AssumeRole\" } ] }"
+	    print("assume_role_policy_doc2 = ", assume_role_policy_doc2)
+            role2 = aws_sip.role_create(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, path, role_name2, assume_role_policy_doc2)
+
+	    ## create policies for CPmember roles
+	    policy_name2 = "CPmember" + org
+	    policy_doc2 = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Action\": \"s3:*\", \"Resource\": \"*\" } ] }"
+	    role_policy2 = aws_sip.policy_create(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key,temp_manager_aws_access_session_token, policy_name2, policy_doc2)
+	    print("CPmember role policy:", role_policy2)
+	    ## attach policy to CPmember roles
+	    policy_arn2 = role_policy2['Policy']['Arn']
+            aws_sip.attach_role_policy(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name2, policy_arn2)
+
+        return cp_account_id
+
+    def core_project_delete(self, cp_account_id, member_orgs, context):
+        aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+        aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+
+        ## get info from admin user
+        response = aws_sip.user_get(aws_access_key_id, aws_access_secret_key, user_name=None)
+        admin_user_arn =  response['User']['Arn']
+        org_no = admin_user_arn.split(':')[4]
+        print("")
+        print("org_no = ", org_no)
+        print("")
+
+        ## get the cp
+        try:
+            cp = self.get_sip(cp_account_id)
+        except exception.NotFound as e:
+            raise exception.NotFound("Cannot find the core project!")
+        if(cp['status'] == "0"):
+            print("The core project doesn't exist!")
+            return
+        print("")
+        print("cp=", cp)
+        print("")
+	sid_id = cp['sid_id']
+
+        ## verify the membership of org/admin in the cp (check if admin org is in the cp members)
+        get_sip_members = cp['sip_members']
+        # get admin org name
+        get_admin_org_name = ""
+        for key, value in get_sip_members.iteritems():
+            print("key=", key)
+            print("value=", value)
+            if (value == org_no):
+                get_admin_org_name = key
+        org_name = get_admin_org_name
+        print("")
+        print("org_name=", org_name)
+        print("")
+        if( org_name == ""):
+            print("Your org doesn't belong to the core project!")
+            return
+
+        # verify the set of member organizations
+        try:
+            sid = self.get_sid(sid_id)
+        except exception.NotFound as e:
+            raise exception.NotFound("Can't find the sid!")
+        members_in_sid = sid['sid_members']
+        if( member_orgs != members_in_sid ):
+            raise exception.NotFound("Sip member orgs dont match the sid members!")
+
+	### delete roles and policies in the cp AWS account
+        ## get cp manager key
+        manager_aws_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
+        manager_aws_access_secret_key = "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"
+
+        ## assume cp manager role in the Sip
+        cp_manager_role_arn = "arn:aws:iam::" + cp_account_id + ":role/SIDmanager"
+        role_session_name = "cp_manager"
+        assume_role_policy = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Action\": \"iam:*\", \"Resource\": \"*\" } ] }"
+        response = aws_sip.assume_role(manager_aws_access_key_id, manager_aws_access_secret_key, cp_manager_role_arn, role_session_name, assume_role_policy)
+        print("")
+        print("Assume role credentials, response=", response)
+        print("")
+
+        ## get cp manager tempory key for assume role
+        temp_manager_aws_access_key_id = response["Credentials"]["AccessKeyId"]
+        temp_manager_aws_access_secret_key = response["Credentials"]["SecretAccessKey"]
+        temp_manager_aws_access_session_token = response["Credentials"]["SessionToken"]
+        print("")
+        print("temp_manager_aws_access_key_id=", temp_manager_aws_access_key_id)
+        print("temp_manager_aws_access_secret_key=", temp_manager_aws_access_secret_key)
+        print("temp_manager_aws_access_session_token=", temp_manager_aws_access_session_token)
+        print("")
+
+        ## verify the admin user in the cp
+        # verify the admin user has a CPadminOrg role in the cp
+        role_name = "CPadmin" + org_name
+        response = aws_sip.role_get(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name)
+        admin_assume_role_policy_doc = response['Role']['AssumeRolePolicyDocument']
+        print("")
+        print("admin_assume_role_policy_doc=", admin_assume_role_policy_doc)
+        print("")
+        # get admin role principlas (admin user arn) in the role
+        admin_principals_aws = admin_assume_role_policy_doc['Statement'][0]['Principal']['AWS']
+        print("admin_principals_aws=", admin_principals_aws)
+        if (admin_principals_aws != admin_user_arn):
+            print("The user is not an admin in the cp!")
+            raise exception.NotFound("The user is not an admin in the cp!")
+            return
+
+        # list roles
+        response = aws_sip.roles_list(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, path="/")
+        print("")
+        print("response to roles_list=", response)
+        print("")
+        index = 0
+        for role in response["Roles"]:
+            role_arn = response["Roles"][index]["Arn"]
+            role_name = role_arn.split('/')[1]
+            index = index + 1
+            print("")
+            print("role_name=", role_name)
+	    
+            # delete roles
+            if(role_name[0:2] == "CP"):
+		# get policy 
+		policy_name = role_name
+	        # detach policies from the role
+		policy_arn = "arn:aws:iam::" + cp_account_id + ":policy/" + policy_name 
+		ref = aws_sip.detach_role_policy(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name, policy_arn)
+                print("")
+                print("going to delete role: role_name=", role_name)
+                ref = aws_sip.role_delete(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name)
+
+	# list policies
+	response = aws_sip.policies_list(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, scope="Local", onlyattached=False, path="/")
+        print("")
+	print("response to policy_list=", response)
+        print("")
+
+	index = 0
+	for policy in response["Policies"]:
+	    policy_name = response["Policies"][index]["PolicyName"] 
+	    policy_arn = response["Policies"][index]["Arn"]
+	    index = index + 1
+            print("")
+	    print("policy_name=", policy_name)
+	    print("policy_arn=", policy_arn)
+	    # delete policies
+	    if(policy_name[0:2] == "CP"):
+                print("")
+	        print("going to delete policy: policy_name=", policy_name)
+		ref = aws_sip.policy_delete(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, policy_arn)
+
+        ## update the cp account to an available AWS account
+	cp = {}
+	cp['status'] = "0"
+	cp['sip_members'] = {}
+	cp['sip_account_id'] = cp_account_id
+	cp['account_name'] = ""
+	cp['sid_id'] = ""
+	print("")	
+	print("sip=", cp)	
+	print("")	
+        ref = self.update_sip(cp_account_id, cp)
+	
+	return ref
+
+    def open_project_create(self, sid_id, context):
+	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+	org_name = context['environment']['openstack.params']['auth']['AWS_ACCOUNT']
+	member_orgs = context['environment']['openstack.params']['auth']['MEMBER_ORGS']
+	sid_name = context['environment']['openstack.params']['auth']['SID_NAME']
+	    
+        ## verify the sec_admin user
+        try:
+            response = aws_sip.user_get(aws_access_key_id, aws_access_secret_key, user_name=None)
+        except exception.NotFound as e:
+            raise exception.NotFound("Can't find the user!")
+        admin_user_arn =  response['User']['Arn']
+        get_admin_org_no = admin_user_arn.split(':')[4]
+	if( get_admin_org_no != member_orgs.get(org_name) ):
+            raise exception.NotFound("The user org doesnt match with the member orgs!" )
+	    return
+	    
+	## get sec_admin org account number and sec_admin user name
+	## e.g.: User ARN: arn:aws:iam::934324332443:user/SecAdmin
+	sec_admin_name = response['User']['UserName']
+	sec_admin_arn = response['User']['Arn']
+	org_account_no = sec_admin_arn[13:24]
+
+	## pick up one available AWS account for the open_project
+	op_account_id = self.get_one_available_sip()
+	op = {}
+	op['status'] = "1"
+	op['sip_members'] = member_orgs
+	op['sip_account_id'] = op_account_id
+	op['account_name'] = sid_name + "_op"
+	op['sid_id'] = sid_id
+
+	## create the open project (update the account)
+	ref = self.update_sip(op_account_id, op)
+	
+	## get op manager key
+	manager_aws_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
+	manager_aws_access_secret_key = "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"
+
+	## assume op manager role in open project 
+	op_manager_role_arn = "arn:aws:iam::" + op_account_id + ":role/SIDmanager"
+	role_session_name = "op_manager"
+	assume_role_policy = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Action\": \"iam:*\", \"Resource\": \"*\" } ] }"
+	response = aws_sip.assume_role(manager_aws_access_key_id, manager_aws_access_secret_key, op_manager_role_arn, role_session_name, assume_role_policy)
+
+	## get op manager tempory key for assume role
+	temp_manager_aws_access_key_id = response["Credentials"]["AccessKeyId"]
+	temp_manager_aws_access_secret_key = response["Credentials"]["SecretAccessKey"]
+	temp_manager_aws_access_session_token = response["Credentials"]["SessionToken"]
+
+	## create OPmember role for organizations in open project
+	## e.g. role name is like OPmemberXXX, XXX is org name
+	path = "/"
+	for org in member_orgs:
+	    ## OPmemberXXX roles:
+	    role_name2 = "OPmember" + org
+	    assume_role_policy_doc2 = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::" + member_orgs[org] + ":user/SecAdmin\" }, \"Action\": \"sts:AssumeRole\" } ] }"
+	    print("assume_role_policy_doc2 = ", assume_role_policy_doc2)
+            role2 = aws_sip.role_create(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, path, role_name2, assume_role_policy_doc2)
+
+	    ## create policies for OPmember roles
+	    policy_name2 = "OPmember" + org
+	    policy_doc2 = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Action\": \"s3:*\", \"Resource\": \"*\" } ] }"
+	    role_policy2 = aws_sip.policy_create(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key,temp_manager_aws_access_session_token, policy_name2, policy_doc2)
+	    print("OPmember role policy:", role_policy2)
+	    ## attach policy to OPmember roles
+	    policy_arn2 = role_policy2['Policy']['Arn']
+            aws_sip.attach_role_policy(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name2, policy_arn2)
+
+        return op_account_id
+
+    def open_project_delete(self, op_account_id, member_orgs, context):
+        aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
+        aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
+
+        ## get info from admin user
+        response = aws_sip.user_get(aws_access_key_id, aws_access_secret_key, user_name=None)
+        admin_user_arn =  response['User']['Arn']
+        org_no = admin_user_arn.split(':')[4]
+
+        ## get the op
+        try:
+            op = self.get_sip(op_account_id)
+        except exception.NotFound as e:
+            raise exception.NotFound("Cannot find the core project!")
+        if(op['status'] == "0"):
+            print("The core project doesn't exist!")
+            return
+	sid_id = op['sid_id']
+
+        ## verify the membership of org/admin in the op (check if admin org is in the op members)
+        get_sip_members = op['sip_members']
+        # get admin org name
+        get_admin_org_name = ""
+        for key, value in get_sip_members.iteritems():
+            if (value == org_no):
+                get_admin_org_name = key
+        org_name = get_admin_org_name
+        if( org_name == ""):
+            print("Your org doesn't belong to the core project!")
+            return
+
+        # verify the set of member organizations
+        try:
+            sid = self.get_sid(sid_id)
+        except exception.NotFound as e:
+            raise exception.NotFound("Can't find the sid!")
+        members_in_sid = sid['sid_members']
+        if( member_orgs != members_in_sid ):
+            raise exception.NotFound("Sip member orgs dont match the sid members!")
+
+	### delete roles and policies in the op AWS account
+        ## get op manager key
+        manager_aws_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
+        manager_aws_access_secret_key = "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"
+
+        ## assume op manager role in the Sip
+        op_manager_role_arn = "arn:aws:iam::" + op_account_id + ":role/SIDmanager"
+        role_session_name = "op_manager"
+        assume_role_policy = "{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Action\": \"iam:*\", \"Resource\": \"*\" } ] }"
+        response = aws_sip.assume_role(manager_aws_access_key_id, manager_aws_access_secret_key, op_manager_role_arn, role_session_name, assume_role_policy)
+
+        ## get op manager tempory key for assume role
+        temp_manager_aws_access_key_id = response["Credentials"]["AccessKeyId"]
+        temp_manager_aws_access_secret_key = response["Credentials"]["SecretAccessKey"]
+        temp_manager_aws_access_session_token = response["Credentials"]["SessionToken"]
+
+        ## verify the admin user in the op
+        # verify the admin user has a CPadminOrg role in the op
+        role_name = "CPadmin" + org_name
+        response = aws_sip.role_get(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name)
+        admin_assume_role_policy_doc = response['Role']['AssumeRolePolicyDocument']
+        # get admin role principlas (admin user arn) in the role
+        admin_principals_aws = admin_assume_role_policy_doc['Statement'][0]['Principal']['AWS']
+        if (admin_principals_aws != admin_user_arn):
+            raise exception.NotFound("The user is not an admin in the op!")
+            return
+
+        # list roles
+        response = aws_sip.roles_list(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, path="/")
+        index = 0
+        for role in response["Roles"]:
+            role_arn = response["Roles"][index]["Arn"]
+            role_name = role_arn.split('/')[1]
+            index = index + 1
+	    
+            # delete roles
+            if(role_name[0:2] == "CP"):
+		# get policy 
+		policy_name = role_name
+	        # detach policies from the role
+		policy_arn = "arn:aws:iam::" + op_account_id + ":policy/" + policy_name 
+		ref = aws_sip.detach_role_policy(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name, policy_arn)
+                print("")
+                print("going to delete role: role_name=", role_name)
+                ref = aws_sip.role_delete(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, role_name)
+
+	# list policies
+	response = aws_sip.policies_list(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, scope="Local", onlyattached=False, path="/")
+
+	index = 0
+	for policy in response["Policies"]:
+	    policy_name = response["Policies"][index]["PolicyName"] 
+	    policy_arn = response["Policies"][index]["Arn"]
+	    index = index + 1
+	    # delete policies
+	    if(policy_name[0:2] == "CP"):
+                print("")
+	        print("going to delete policy: policy_name=", policy_name)
+		ref = aws_sip.policy_delete(temp_manager_aws_access_key_id, temp_manager_aws_access_secret_key, temp_manager_aws_access_session_token, policy_arn)
+
+        ## update the op account to an available AWS account
+	op = {}
+	op['status'] = "0"
+	op['sip_members'] = {}
+	op['sip_account_id'] = op_account_id
+	op['account_name'] = ""
+	op['sid_id'] = ""
+        ref = self.update_sip(op_account_id, op)
+	
+	return ref
+
 
     def sid_get(self, context, auth=None):
 	sid_id = context['environment']['openstack.params']['auth']['SID_ID']
