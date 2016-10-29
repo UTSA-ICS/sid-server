@@ -36,22 +36,11 @@ CONF = cfg.CONF
 LOG = log.getLogger(__name__)
 
 
-class AWS(wsgi.Application):
+class OpenStack(wsgi.Application):
 
     def __init__(self):
         self.Mysip = sql.SIPs()
         self.Mysid = sql.SIDs()
-
-    ## manually creare a sid for a group of organizations
-    ## manually create Core Project and Open Project
-    ## maintain a list of organizations accounts
-    ## maintain a list of organizations security admin users
-    orgs = {"CPS":"934324332443", "SAWS":"042298307144"}
-    orgs_admins = {"SecAdminCPS":"SecAdminCPS", "SecAdminSAWS":"SecAdminSAWS"}
-    ## maintain a list of AWS accounts for sip creation
-    #sips_accounts = {"SIP1":{"AWS_ACCOUNT_NO":"652714115935", "SIP_MANAGER":{"AWS_ACCESS_KEY_ID":"AKIAJD7U6ZQK5LKB2XQQ", "AWS_ACCESS_SECRET_KEY":"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"}}, "SIP2":{"AWS_ACCOUNT_NO":"401991328752", "SIP_MANAGER":{"AWS_ACCESS_KEY_ID":"AKIAJOSJHXHCNBVWSGMA", "AWS_ACCESS_SECRET_KEY":"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"}}}
-    sips_accounts = {"Available":{"AWS_ACCOUNT_NO":["652714115935", "401991328752"]}, "Unavailable":{"AWS_ACCOUNT_NO":""}}
-
 
     # SID
     def login_aws_user(self, context, auth=None):
@@ -61,9 +50,6 @@ class AWS(wsgi.Application):
 	#print("The environment IS --> ", context['environment'])
 	print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 	#print("The openstack_parms IS --> ", context['environment']['openstack.params'])
-	print("The AWS ACESS KEY IS --> ", context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID'])
-	print("The AWS ACESS KEY ID IS --> ", context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY'])
-	print("The AWS CUSTOMER IS --> ", context['environment']['openstack.params']['auth']['AWS_ACCOUNT'])
 	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
 	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
 	print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
@@ -80,14 +66,33 @@ class AWS(wsgi.Application):
 	print("")
         return response
 
-    def user_create(self, context, auth=None):
+    def project_create(self, context, auth=None):
 	aws_access_key_id = context['environment']['openstack.params']['auth']['AWS_ACCESS_KEY_ID']
 	aws_access_secret_key = context['environment']['openstack.params']['auth']['AWS_ACCESS_SECRET_KEY']
-	user_name = context['environment']['openstack.params']['auth']['AWS_USER_NAME']
-	path='/'
-        response = aws_sip.user_create(aws_access_key_id, aws_access_secret_key, path, user_name)
-	print("response: ",response)
-	print("")
+	project_name = context['environment']['openstack.params']['auth']['PROJECT_NAME']
+        #response = aws_sip.user_create(aws_access_key_id, aws_access_secret_key, path, user_name)
+	#print("response: ",response)
+	#print("")
+        identity_client = self.app.client_manager.identity
+
+        enabled = True
+        if parsed_args.disable:
+            enabled = False
+        kwargs = {}
+        if parsed_args.property:
+            kwargs = parsed_args.property.copy()
+
+        project = identity_client.tenants.create(
+            parsed_args.name,
+            description=parsed_args.description,
+            enabled=enabled,
+            **kwargs
+        )
+
+        info = {}
+        info.update(project._info)
+        return zip(*sorted(six.iteritems(info)))
+
         return response
 
     def user_delete(self, context, auth=None):

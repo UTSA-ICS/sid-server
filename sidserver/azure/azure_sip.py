@@ -1,57 +1,57 @@
-from azure.common.credentials import UserPassCredentials
-from azure.mgmt.authorization import AuthorizationManagementClient, AuthorizationManagementClientConfiguration
-from azure.mgmt.redis.models import Sku, RedisCreateOrUpdateParameters
-
-credentials = UserPassCredentials(
-    'SIDmanager@SIDdomain.onmicrosoft.com',    # Your new user
-    'Puhu5543',  # Your password
-)
-
-subscription_id = '1beafe45-ce54-477b-8876-01d6129b7c53'
-
-authorization_client = AuthorizationManagementClient(
-    AuthorizationManagementClientConfiguration(
-        credentials,
-        subscription_id
-    )
-)
-
-#Check permissions for a resource group
+from azure.graphrbac.models import UserCreateParameters, UserCreateParametersPasswordProfile
 
 def azure_login():
-    group_name = 'Sip2gp1'
-    permissions = self.authorization_client.permissions.list_for_resource_group(
-        group_name
-    )
     print("")
     print("Check permissions for a resource group!")
+    group_name = 'Sip2gp1'
+    permissions = authorization_client.permissions.list_for_resource_group(group_name)
     print("The permissions are: ", permissions)
     print("")
     return permissions
 
-if __name__ == "__main__":
-    azure_login()
+#if __name__ == "__main__":
+#    azure_login()
 
+def user_list(client):
+    user_list = client.user.list()
+    user_list.reset()
+    items = user_list.next()
+    for i in items:
+	print("user:", i.display_name)
+    return user_list
 
-def user_get(access_key_id, access_secret_key):
-    client = boto3.client('iam', azure_access_key_id=access_key_id, azure_secret_access_key=access_secret_key)
-    user = client.get_user()
-    print("")
-    print("The user is: ", user)
-    print("")
+def user_create(client, parameters):
+    user = client.user.create(
+        UserCreateParameters(
+            account_enabled=False,
+            display_name=parameters['DISPLAY_NAME'],
+            mail_nickname=parameters['MAIL_NICKNAME'],
+            password_profile=UserCreateParametersPasswordProfile(
+                password="MyStr0ngP4ssword",
+                force_change_password_next_login=True
+            ),
+            user_principal_name=parameters['USER_PRINCIPAL_NAME']
+        )
+    )
+    # user is a User instance
+    #self.assertEqual(user.display_name, 'Test Buddy')
+    #user = graphrbac_client.user.get(user.object_id)
+    #self.assertEqual(user.display_name, 'Test Buddy')
+    #for user in graphrbac_client.user.list(filter="displayName eq 'Test Buddy'"):
+    #    self.assertEqual(user.display_name, 'Test Buddy')
+    #graphrbac_client.user.delete(user.object_id)
+
     return user
 
-def user_create(access_key_id, access_secret_key, path, user_name):
-    client = boto3.client('iam', azure_access_key_id=access_key_id, azure_secret_access_key=access_secret_key)
-    user = client.create_user(Path=path, UserName=user_name)
-    print("")
-    print("The new created user is: ", user)
-    print("")
+def user_get(client, user_id):
+    #user_id = "testbuddy@SIDdomain.onmicrosoft.com"
+    user = client.user.get(user_id )
+    print("user:", user.display_name)
     return user
 
-def user_delete(access_key_id, access_secret_key, user_name):
-    client = boto3.client('iam', azure_access_key_id=access_key_id, azure_secret_access_key=access_secret_key)
-    user = client.delete_user(UserName=user_name)
+def user_delete(client, user_id):
+    #user_id = "testbuddy@SIDdomain.onmicrosoft.com"
+    user = client.user.delete(user_id)
     return user
 
 def policies_list(access_key_id, access_secret_key, scope, onlyattached, path):

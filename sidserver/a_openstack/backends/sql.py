@@ -16,17 +16,17 @@ from sidserver.common import sql
 from sidserver import exception
 
 
-class AzureSIPModel(sql.ModelBase, sql.DictBase):
-    __tablename__ = 'AzureSIPs'
-    attributes = ['sip_subscription_id', 'subscription_name', 'sip_members', 'available_status', 'sid_id']
-    sip_subscription_id = sql.Column(sql.String(64), primary_key=True)
-    subscription_name = sql.Column(sql.String(64), nullable=True)
+class SIPModel(sql.ModelBase, sql.DictBase):
+    __tablename__ = 'OpenStackSIPs'
+    attributes = ['sip_project_id', 'project_name', 'sip_members', 'available_status', 'sid_id']
+    sip_project_id = sql.Column(sql.String(64), primary_key=True)
+    project_name = sql.Column(sql.String(64), nullable=True)
     sip_members = sql.Column(sql.JsonBlob(), nullable=True)
     available_status = sql.Column(sql.String(1), nullable=True)
     sid_id = sql.Column(sql.String(32), nullable=True)
     
-class AzureSIDModel(sql.ModelBase, sql.DictBase):
-    __tablename__ = 'AzureSIDs'
+class SIDModel(sql.ModelBase, sql.DictBase):
+    __tablename__ = 'OpenStackSIDs'
     attributes = ['sid_id', 'sid_name', 'sid_members', 'core_project', 'open_project']
     sid_id = sql.Column(sql.String(32), primary_key=True)
     sid_name = sql.Column(sql.String(32), nullable=True)
@@ -35,82 +35,87 @@ class AzureSIDModel(sql.ModelBase, sql.DictBase):
     open_project = sql.Column(sql.String(32), nullable=True)
     
 
-class AzureSIPs():
+class SIPs():
 
     @sql.handle_conflicts(conflict_type='sip')
     def add_sip(self, sip):
         session = sql.get_session()
         with session.begin():
-            ref = AzureSIPModel.from_dict(sip)
+            ref = SIPModel.from_dict(sip)
             session.add(ref)
 
         return ref.to_dict()
 
+    def get_sip(self, sip_project_id):
+        session = sql.get_session()
+        ref = session.query(SIPModel).get(sip_project_id)
+        if not ref:
+            raise exception.NotFound(target=sip_project_id)
+        return ref.to_dict()
+
     def list_sips(self):
         session = sql.get_session()
-        refs = session.query(AzureSIPModel).all()
+        refs = session.query(SIPModel).all()
         return [ref.to_dict() for ref in refs]
 
     def list_available_sips(self):
         session = sql.get_session()
-        #refs = session.query(AzureSIPModel).all()
-	refs = session.query(AzureSIPModel).filter_by(status="0").all()
+	refs = session.query(SIPModel).filter_by(available_status="0").all()
         return [ref.to_dict() for ref in refs]
 
-    def get_sip(self, sip_account_id):
+    def list_sips_by_sid(self, sid_id):
         session = sql.get_session()
-        ref = session.query(AzureSIPModel).get(sip_account_id)
-        if not ref:
-            raise exception.NotFound(target=sip_account_id)
-        return ref.to_dict()
+	refs = session.query(SIPModel).filter_by(sid_id=sid_id).all()
+        return [ref.to_dict() for ref in refs]
 
     @sql.handle_conflicts(conflict_type='sip')
-    def update_sip(self, sip_account_id, sip):
+    def update_sip(self, sip_project_id, sip):
         session = sql.get_session()
         with session.begin():
-            ref = self._get_sip(session, sip_account_id)
+            ref = self._get_sip(session, sip_project_id)
 	    old_dict = ref.to_dict()
 	    for k in sip:
 		old_dict[k] = sip[k]
-	    new_sip = AzureSIPModel.from_dict(old_dict)
-	    ref.account_name = new_sip.account_name
+	    new_sip = SIPModel.from_dict(old_dict)
+	    ref.project_name = new_sip.project_name
 	    ref.sip_members = new_sip.sip_members
-	    ref.status = new_sip.status
+	    ref.available_status = new_sip.available_status
+	    ref.sid_id = new_sip.sid_id
         return ref.to_dict()
 
-    def delete_sip(self, sip_account_id):
+    def delete_sip(self, sip_project_id):
         session = sql.get_session()
         with session.begin():
-            ref = self._get_sip(session, sip_account_id)
+            ref = self._get_sip(session, sip_project_id)
             session.delete(ref)
 	return
 
-    def _get_sip(self, session, sip_account_id):
+    def _get_sip(self, session, sip_project_id):
         """Private method to get a sip model object (NOT a dictionary)."""
-        ref = session.query(AzureSIPModel).get(sip_account_id)
+        ref = session.query(SIPModel).get(sip_project_id)
         if not ref:
-            raise exception.NotFound(target=sip_account_id)
+            raise exception.NotFound(target=sip_project_id)
         return ref
 
 
-class AzureSIDs():
+class SIDs():
 
     @sql.handle_conflicts(conflict_type='sid')
     def add_sid(self, sid):
         session = sql.get_session()
         with session.begin():
-            ref = AzureSIDModel.from_dict(sid)
+            ref = SIDModel.from_dict(sid)
             session.add(ref)
         return ref.to_dict()
 
     def list_sids(self):
         session = sql.get_session()
-        refs = session.query(AzureSIDModel).all()
+        refs = session.query(SIDModel).all()
         return [ref.to_dict() for ref in refs]
 
     def get_sid(self, sid_id):
         session = sql.get_session()
-        ref = session.query(AzureSIDModel).get(sid_id)
+        ref = session.query(SIDModel).get(sid_id)
         if not ref:
             raise exception.NotFound(target=sid_id)
         return ref.to_dict()
@@ -124,7 +129,7 @@ class AzureSIDs():
 
     def _get_sid(self, session, sid_id):
         """Private method to get a sid model object (NOT a dictionary)."""
-        ref = session.query(AzureSIDModel).get(sid_id)
+        ref = session.query(SIDModel).get(sid_id)
         if not ref:
             raise exception.NotFound(target=sid_id)
         return ref

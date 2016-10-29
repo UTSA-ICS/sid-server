@@ -17,12 +17,16 @@ from sidserver.azure import controllers
 
 class Router(wsgi.ComposableRouter):
     def add_routes(self, mapper):
-        azure_controller = controllers.AWS()
+        azure_controller = controllers.Azure()
 
 	# SID 
-        mapper.connect('/azure/user_login',
+        mapper.connect('/azure/azure_login',
                        controller=azure_controller,
                        action='login_azure_user',
+                       conditions=dict(method=['POST']))
+        mapper.connect('/azure/user_list',
+                       controller=azure_controller,
+                       action='user_list',
                        conditions=dict(method=['POST']))
         mapper.connect('/azure/user_get',
                        controller=azure_controller,

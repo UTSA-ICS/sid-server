@@ -24,7 +24,7 @@ from sidserver.common import wsgi
 from sidserver import controllers
 from sidserver import routers
 from sidserver import aws
-#from sidserver import azure
+from sidserver import azure
 
 
 CONF = cfg.CONF
@@ -60,6 +60,7 @@ def public_app_factory(global_conf, **local_conf):
     controllers.register_version('v2.0')
     return wsgi.ComposingRouter(routes.Mapper(),
                                 [aws.routers.Router(),
+                                 azure.routers.Router(),
                                  routers.VersionV2('public'),
                                  routers.Extension(False)])
 
@@ -69,6 +70,7 @@ def admin_app_factory(global_conf, **local_conf):
     controllers.register_version('v2.0')
     return wsgi.ComposingRouter(routes.Mapper(),
                                 [aws.routers.Router(),
+                                 azure.routers.Router(),
                                  routers.VersionV2('admin'),
                                  routers.Extension()])
 
