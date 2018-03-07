@@ -59,12 +59,12 @@ class Azure(wsgi.Application):
         subscription_id= str(context['environment']['openstack.params']['auth']['SUBSCRIPTION_ID'])
         credentials = UserPassCredentials(
             "SIDmanager@SIDdomain.onmicrosoft.com",    # Your new user
-            "Azure123!@#",  # Your password
+            "XXXX",  # Your password
 	    #user_id,
 	    #user_pw,
             resource = "https://graph.windows.net"
         )
-        azure_tenant_id = "cc27778d-9be7-4bca-a432-1251a4144dc6"
+        azure_tenant_id = "cc27778d-9be"
         self.graphrbac_client = GraphRbacManagementClient(
             GraphRbacManagementClientConfiguration(
                 credentials,
@@ -72,7 +72,7 @@ class Azure(wsgi.Application):
             )
         )
 
-        #subscription_id = '1beafe45-ce54-477b-8876-01d6129b7c53'
+        #subscription_id = '1beafe45-ce54'
         self.authorization_client = AuthorizationManagementClient(
             AuthorizationManagementClientConfiguration(
                 credentials,
@@ -284,8 +284,8 @@ class Azure(wsgi.Application):
 	ref = self.update_sip(sip_account_id, sip)
 	
 	## get sip manager key
-	manager_azure_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
-	manager_azure_access_secret_key = "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"
+	manager_azure_access_key_id = "AKIAJLXXXX"
+	manager_azure_access_secret_key = "xNZ2HQqmXoOUJ2dJMmEdCXXXX"
 
 	## create SIPadmin/SIPmember roles for organizations in the Sip
 	## e.g. role name is like SIPadminXXX/SIPmemberXXX, XXX is org name
