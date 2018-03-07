@@ -286,8 +286,8 @@ class AWS(wsgi.Application):
 	ref = self.update_sip(sip_account_id, sip)
 	
 	## get sip manager key
-	manager_aws_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
-	manager_aws_access_secret_key = "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"
+	manager_aws_access_key_id = "AKIAJLXWXBRM"
+	manager_aws_access_secret_key = "xNZ2HQqmXoOUJ2dJM2p4SJQ"
 
 	## assume sip manager role in the Sip
 	sip_manager_role_arn = "arn:aws:iam::" + sip_account_id + ":role/SIDmanager"
@@ -410,8 +410,8 @@ class AWS(wsgi.Application):
 
 	### delete roles and policies in the sip AWS account
         ## get sip manager key
-        manager_aws_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
-        manager_aws_access_secret_key = "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"
+        manager_aws_access_key_id = "XXXX"
+        manager_aws_access_secret_key = "ZZZZZZZZZZZZ"
 
         ## assume sip manager role in the Sip
         sip_manager_role_arn = "arn:aws:iam::" + sip_account_id + ":role/SIDmanager"
@@ -571,8 +571,8 @@ class AWS(wsgi.Application):
 	#! because by default (giving keys) the admin user can only access to his own account
 
         ## get sip manager key
-        manager_aws_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
-        manager_aws_access_secret_key = "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"
+        manager_aws_access_key_id = "XXXXXXX"
+        manager_aws_access_secret_key = "ZZZZZZZZZZZ"
 
         ## assume sip manager role in the Sip
         sip_manager_role_arn = "arn:aws:iam::" + sip_account_id + ":role/SIDmanager"
@@ -727,8 +727,8 @@ class AWS(wsgi.Application):
 
 	### start removing the user
         ## get sip manager key
-        manager_aws_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
-        manager_aws_access_secret_key = "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"
+        manager_aws_access_key_id = "XXXXXXX"
+        manager_aws_access_secret_key = "ZZZZZZZZZZZZ"
 
         ## assume sip manager role in the Sip
         sip_manager_role_arn = "arn:aws:iam::" + sip_account_id + ":role/SIDmanager"
@@ -878,8 +878,8 @@ class AWS(wsgi.Application):
 	#! because by default (giving keys) the admin user can only access to his own account
 
         ## get cp manager key
-        manager_aws_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
-        manager_aws_access_secret_key = "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"
+        manager_aws_access_key_id = "XXXXXXXXX"
+        manager_aws_access_secret_key = "ZZZZZZZZZZZZZ"
 
         ## assume cp manager role in the Sip
         cp_manager_role_arn = "arn:aws:iam::" + cp_account_id + ":role/SIDmanager"
@@ -1012,8 +1012,8 @@ class AWS(wsgi.Application):
 
 	### start removing the user
         ## get cp manager key
-        manager_aws_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
-        manager_aws_access_secret_key = "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"
+        manager_aws_access_key_id = "XXXXXXXXX"
+        manager_aws_access_secret_key = "ZZZZZZZZZZZZ"
 
         ## assume cp manager role in the Sip
         cp_manager_role_arn = "arn:aws:iam::" + cp_account_id + ":role/SIDmanager"
@@ -1218,8 +1218,8 @@ class AWS(wsgi.Application):
 	ref = self.update_sip(cp_account_id, cp)
 	
 	## get cp manager key
-	manager_aws_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
-	manager_aws_access_secret_key = "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"
+	manager_aws_access_key_id = "AKIAJL"
+	manager_aws_access_secret_key = "xNZ2HQqmXoOUJ2d"
 
 	## assume cp manager role in core project 
 	cp_manager_role_arn = "arn:aws:iam::" + cp_account_id + ":role/SIDmanager"
@@ -1330,8 +1330,8 @@ class AWS(wsgi.Application):
 
 	### delete roles and policies in the cp AWS account
         ## get cp manager key
-        manager_aws_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
-        manager_aws_access_secret_key = "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"
+        manager_aws_access_key_id = "AKIAJL"
+        manager_aws_access_secret_key = "xNZ2HQqmXo"
 
         ## assume cp manager role in the Sip
         cp_manager_role_arn = "arn:aws:iam::" + cp_account_id + ":role/SIDmanager"
@@ -1463,8 +1463,8 @@ class AWS(wsgi.Application):
 	ref = self.update_sip(op_account_id, op)
 	
 	## get op manager key
-	manager_aws_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
-	manager_aws_access_secret_key = "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"
+	manager_aws_access_key_id = "AKIAJL"
+	manager_aws_access_secret_key = "xNZ2HQqmXoOU"
 
 	## assume op manager role in open project 
 	op_manager_role_arn = "arn:aws:iam::" + op_account_id + ":role/SIDmanager"
@@ -1540,8 +1540,8 @@ class AWS(wsgi.Application):
 
 	### delete roles and policies in the op AWS account
         ## get op manager key
-        manager_aws_access_key_id = "AKIAJLXW5XRMHXXBRMLQ"
-        manager_aws_access_secret_key = "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"
+        manager_aws_access_key_id = "AKIAJL"
+        manager_aws_access_secret_key = "xNZ2HQqmXoOUJ2"
 
         ## assume op manager role in the Sip
         op_manager_role_arn = "arn:aws:iam::" + op_account_id + ":role/SIDmanager"
